@@ -1,0 +1,46 @@
+{
+	"name": "template-repos-ts-sol",
+	"version": "1.0.0",
+	"description": "Template repository for using TypeScript and Solidity",
+	"main": "index.js",
+	"scripts": {
+		"test": "mocha --require ts-node/register 'test/**/*.ts' --timeout 300000 --parallel",
+		"pretest": "yarn generate",
+		"generate": "waffle waffle-config.json",
+		"pregenerate": "yarn clean",
+		"lint": "yarn lint:eslint && yarn lint:solhint && yarn lint:format",
+		"lint:eslint": "eslint . --ext .ts --fix",
+		"lint:solhint": "solhint --fix --max-warnings 0 \"contracts/**/*.sol\"",
+		"lint:format": "prettier --write '**/*.{sol,ts,json,md,yml}'",
+		"build": "tsc -p tsconfig.build.json",
+		"prebuild": "yarn generate",
+		"clean": "rimraf scripts/**/*.js build"
+	},
+	"author": "",
+	"license": "MPL-2.0",
+	"devDependencies": {
+		"@openzeppelin/contracts": "4.2.0",
+		"@types/chai": "4.2.21",
+		"@types/dotenv": "8.2.0",
+		"@types/mocha": "9.0.0",
+		"@typescript-eslint/eslint-plugin": "4.29.1",
+		"@typescript-eslint/parser": "4.29.1",
+		"chai": "4.3.4",
+		"dotenv": "10.0.0",
+		"eslint": "7.32.0",
+		"eslint-config-prettier": "8.3.0",
+		"eslint-config-xo": "0.38.0",
+		"eslint-config-xo-typescript": "0.44.0",
+		"ethereum-waffle": "3.4.0",
+		"husky": "7.0.1",
+		"mocha": "9.0.3",
+		"prettier": "2.3.2",
+		"prettier-plugin-solidity": "1.0.0-beta.17",
+		"rimraf": "3.0.2",
+		"ts-node": "10.2.0",
+		"typescript": "4.3.5"
+	},
+	"dependencies": {
+		"solhint": "^3.3.2"
+	}
+}

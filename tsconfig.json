@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"lib": ["es2019"],
+		"strict": true,
+		"skipLibCheck": true,
+		"target": "es2019"
+	},
+	"include": ["**/*"]
+}

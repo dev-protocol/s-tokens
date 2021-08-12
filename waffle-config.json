@@ -1,0 +1,11 @@
+{
+	"sourceDirectory": "./contracts",
+	"outputDirectory": "./build",
+	"nodeModulesDirectory": "./node_modules",
+	"compilerVersion": "0.8.3",
+	"compilerOptions": {
+		"optimizer": {
+			"enabled": true
+		}
+	}
+}
