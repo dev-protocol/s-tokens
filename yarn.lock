@@ -35,6 +35,20 @@
   dependencies:
     "@cspotcode/source-map-consumer" "0.8.0"
 
+"@devprotocol/i-s-tokens@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@devprotocol/i-s-tokens/-/i-s-tokens-1.0.0.tgz#5cb576e83ec97f69e4e1a865033887aa9efafa8b"
+  integrity sha512-8Hbgr+fMyJwgg7okxEzoC7S/o7U7+MqxT+Kzqz6tjbVe6BQh2zz4+lGXQhECY06te8uKujJmpxHKTHv+lkZx7A==
+  dependencies:
+    solhint "^3.3.2"
+
+"@devprotocol/util-contracts@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@devprotocol/util-contracts/-/util-contracts-3.0.0.tgz#fc447e83f9825d2c7ea8e907ece563db59eeee22"
+  integrity sha512-JbWraVLYmahFGMxCaCD7btDpNGV6e0FsDYvewVzJBQwuPPfB9z3YldP5tEBu3elAaMIcdnCPBcp0JpMyJ3fWQw==
+  dependencies:
+    "@openzeppelin/contracts" "4.2.0"
+
 "@ensdomains/ens@^0.4.4":
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/@ensdomains/ens/-/ens-0.4.5.tgz#e0aebc005afdc066447c6e22feb4eda89a5edbfc"
