@@ -5,8 +5,6 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "mocha --require ts-node/register 'test/**/*.ts' --timeout 300000 --parallel",
-		"test2": "mocha --require ts-node/register 'test/**/*.ts' --timeout 300000",
-		"pretest2": "yarn generate",
 		"pretest": "yarn generate",
 		"generate": "waffle waffle-config.json",
 		"pregenerate": "yarn clean",
