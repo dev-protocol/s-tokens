@@ -42,10 +42,10 @@
   dependencies:
     solhint "^3.3.2"
 
-"@devprotocol/util-contracts@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@devprotocol/util-contracts/-/util-contracts-3.0.0.tgz#fc447e83f9825d2c7ea8e907ece563db59eeee22"
-  integrity sha512-JbWraVLYmahFGMxCaCD7btDpNGV6e0FsDYvewVzJBQwuPPfB9z3YldP5tEBu3elAaMIcdnCPBcp0JpMyJ3fWQw==
+"@devprotocol/util-contracts@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@devprotocol/util-contracts/-/util-contracts-3.2.0.tgz#fb55ddf2a23f8444c83b35280fed08f9b982fc0b"
+  integrity sha512-nOnO6lsupj/5Y9IY0ag+SMi/xc2eIjZpT1+wiYfgzdXnbCs95C2p6zvzq9qCFvT2c5I5Zi2NfXp5JW8KLEp/kg==
   dependencies:
     "@openzeppelin/contracts" "4.2.0"
 

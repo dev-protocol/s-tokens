@@ -42,7 +42,7 @@
 	},
 	"dependencies": {
 		"@devprotocol/i-s-tokens": "^1.0.0",
-		"@devprotocol/util-contracts": "^3.0.0",
+		"@devprotocol/util-contracts": "^3.2.0",
 		"solhint": "^3.3.2"
 	}
 }
