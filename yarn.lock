@@ -42,12 +42,12 @@
   dependencies:
     solhint "^3.3.2"
 
-"@devprotocol/util-contracts@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@devprotocol/util-contracts/-/util-contracts-3.2.0.tgz#fb55ddf2a23f8444c83b35280fed08f9b982fc0b"
-  integrity sha512-nOnO6lsupj/5Y9IY0ag+SMi/xc2eIjZpT1+wiYfgzdXnbCs95C2p6zvzq9qCFvT2c5I5Zi2NfXp5JW8KLEp/kg==
+"@devprotocol/util-contracts@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@devprotocol/util-contracts/-/util-contracts-3.3.0.tgz#56978e832f12b1796d937b20e57be307f2fcbc07"
+  integrity sha512-5KgaYUcp7tbPIjSzoxE/40pMYqfFdqHsMraKy+ATDWVEy1D7gfdQEvOyx2nMwE/a5pjSO+UDgZP1hclEbnyTRQ==
   dependencies:
-    "@openzeppelin/contracts" "4.2.0"
+    "@openzeppelin/contracts" "4.3.0"
 
 "@ensdomains/ens@^0.4.4":
   version "0.4.5"
@@ -859,6 +859,11 @@
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.2.0.tgz#260d921d99356e48013d9d760caaa6cea35dc642"
   integrity sha512-LD4NnkKpHHSMo5z9MvFsG4g1xxZUDqV3A3Futu3nvyfs4wPwXxqOgMaxOoa2PeyGL2VNeSlbxT54enbQzGcgJQ==
+
+"@openzeppelin/contracts@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.3.0.tgz#345236d4ec73ef381ab4907c6ef66fd55e5dedad"
+  integrity sha512-+uBDl/TrmR0Kch6mq3tuxMex/fK7huR6+fQMae+zJk1K5T+dp0pFl12Hbc+1L6oYMXoyDSBJ8zqhRIntrREDFA==
 
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"

@@ -2,9 +2,9 @@
 pragma solidity 0.8.7;
 
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
-import {UsingStorage} from "@devprotocol/util-contracts/contracts/storage/UsingStorage.sol";
+import {UsingStorageSimple} from "@devprotocol/util-contracts/contracts/storage/UsingStorageSimple.sol";
 
-contract STokensManagerStorage is UsingStorage {
+contract STokensManagerStorage is UsingStorageSimple {
 	function getStoragePositionsV1(uint256 _tokenId) public view returns(ISTokensManager.StakingPosition memory) {
 		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		string memory tmp = eternalStorage().getString(key);
@@ -14,7 +14,7 @@ contract STokensManagerStorage is UsingStorage {
 		return abi.decode(bytes(tmp), (ISTokensManager.StakingPosition));
 	}
 
-	function setStoragePositionsV1(uint256 _tokenId, ISTokensManager.StakingPosition calldata _position) internal {
+	function setStoragePositionsV1(uint256 _tokenId, ISTokensManager.StakingPosition memory _position) internal {
 		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		bytes memory tmp = abi.encode(_position);
 		string memory converted = string(tmp);

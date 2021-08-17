@@ -11,35 +11,39 @@ contract STokensManager is ISTokensManager, STokensManagerStorage, STokensDescri
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
 
-	function tokenURI(uint256 _tokenId) external view returns (string){
-		require(_exists(tokenId), "not found");
+	// TODO この名前でいいか確認する
+	constructor() ERC721("SDev", "SDEV") {}
+
+	function tokenURI(uint256 _tokenId) public view override returns (string memory){
+		require(_exists(_tokenId), "not found");
 		return getTokenURI(getStoragePositionsV1(_tokenId));
 	}
 
 	function mint(MintParams calldata _params)
-		external
+		external override
 		returns (uint256 tokenId, StakingPosition memory position){
 		_tokenIds.increment();
 		uint256 newItemId = _tokenIds.current();
 		_safeMint(_params.owner, newItemId);
-		StakingPosition position = StakingPosition(_params.owner, _params.property, _params.amount, _params.price);
-		setStoragePositionsV1(tokenId, position);
-		return (newItemId, position);
+		// TODO 0でいいのか後で確認する
+		StakingPosition memory newPosition = StakingPosition(_params.owner, _params.property, _params.amount, _params.price, 0);
+		setStoragePositionsV1(tokenId, newPosition);
+		return (newItemId, newPosition);
 	}
 
 	function update(UpdateParams calldata _params)
-		external
+		external override
 		returns (StakingPosition memory position){
-		StakingPosition position = getStoragePositionsV1(_params.tokenId);
-		position.amount = _params.amount;
-		position.price = _params.price;
-		position.historical = _params.historical;
-		setStoragePositionsV1(tokenId, position);
-		return position;
+		StakingPosition memory currentPosition = getStoragePositionsV1(_params.tokenId);
+		currentPosition.amount = _params.amount;
+		currentPosition.price = _params.price;
+		currentPosition.historical = _params.historical;
+		setStoragePositionsV1(_params.tokenId, currentPosition);
+		return currentPosition;
 	}
 
 	function positions(uint256 _tokenId)
-		external
+		external override
 		view
 		returns (StakingPosition memory position) {
 			return getStoragePositionsV1(_tokenId);
