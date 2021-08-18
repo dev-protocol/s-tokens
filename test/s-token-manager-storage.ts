@@ -3,7 +3,7 @@ import { expect, use } from 'chai'
 import { Contract, constants } from 'ethers'
 
 import { deployContract, MockProvider, solidity } from 'ethereum-waffle'
-import * as STokensManagerStorageTest from '../build/STokensManagerStorageTest.json'
+import * as STokensManagerStorageTest from '../build/STokensManager.json'
 import * as TestData from '../build/TestData.json'
 
 use(solidity)

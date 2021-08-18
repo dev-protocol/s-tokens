@@ -35,3 +35,5 @@
 // 	console.log(`Deploying to network [${node ?? 'local'}]`)
 // 	await deployer(wallet, ContractFactory, envs)
 // }
+
+// TODO デプロイスクリプト作成
