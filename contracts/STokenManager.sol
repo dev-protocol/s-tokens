@@ -8,7 +8,12 @@ import {IAddressConfig} from "./IAddressConfig.sol";
 import {STokensManagerStorage} from "./STokensManagerStorage.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 
-contract STokensManager is ISTokensManager, STokensManagerStorage, STokensDescriptor, ERC721 {
+contract STokensManager is
+	ISTokensManager,
+	STokensManagerStorage,
+	STokensDescriptor,
+	ERC721
+{
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
 	address private config;
@@ -18,29 +23,52 @@ contract STokensManager is ISTokensManager, STokensManagerStorage, STokensDescri
 		config = _config;
 	}
 
-	function tokenURI(uint256 _tokenId) public view override returns (string memory){
+	function tokenURI(uint256 _tokenId)
+		public
+		view
+		override
+		returns (string memory)
+	{
 		require(_exists(_tokenId), "not found");
 		return getTokenURI(getStoragePositionsV1(_tokenId));
 	}
 
 	function mint(MintParams calldata _params)
-		external override
-		returns (uint256 tokenId, StakingPosition memory position){
-		require(IAddressConfig(config).lockup() == _msgSender(), "illegal access");
+		external
+		override
+		returns (uint256 tokenId, StakingPosition memory position)
+	{
+		require(
+			IAddressConfig(config).lockup() == _msgSender(),
+			"illegal access"
+		);
 		_tokenIds.increment();
 		uint256 newItemId = _tokenIds.current();
 		_safeMint(_params.owner, newItemId);
 		// TODO 0でいいのか後で確認する
-		StakingPosition memory newPosition = StakingPosition(_params.owner, _params.property, _params.amount, _params.price, 0);
+		StakingPosition memory newPosition = StakingPosition(
+			_params.owner,
+			_params.property,
+			_params.amount,
+			_params.price,
+			0
+		);
 		setStoragePositionsV1(tokenId, newPosition);
 		return (newItemId, newPosition);
 	}
 
 	function update(UpdateParams calldata _params)
-		external override
-		returns (StakingPosition memory position){
-		require(IAddressConfig(config).lockup() == _msgSender(), "illegal access");
-		StakingPosition memory currentPosition = getStoragePositionsV1(_params.tokenId);
+		external
+		override
+		returns (StakingPosition memory position)
+	{
+		require(
+			IAddressConfig(config).lockup() == _msgSender(),
+			"illegal access"
+		);
+		StakingPosition memory currentPosition = getStoragePositionsV1(
+			_params.tokenId
+		);
 		currentPosition.amount = _params.amount;
 		currentPosition.price = _params.price;
 		currentPosition.historical = _params.historical;
@@ -49,9 +77,11 @@ contract STokensManager is ISTokensManager, STokensManagerStorage, STokensDescri
 	}
 
 	function positions(uint256 _tokenId)
-		external override
+		external
 		view
-		returns (StakingPosition memory position) {
-			return getStoragePositionsV1(_tokenId);
+		override
+		returns (StakingPosition memory position)
+	{
+		return getStoragePositionsV1(_tokenId);
 	}
 }

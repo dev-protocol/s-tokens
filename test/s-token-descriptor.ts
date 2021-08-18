@@ -2,7 +2,7 @@ import { Contract } from 'ethers'
 import { deployContract, MockProvider } from 'ethereum-waffle'
 import * as STokensDescriptor from '../build/STokensDescriptor.json'
 import * as TestData from '../build/TestData.json'
-import {checkTokenUri} from './token-uri-test'
+import { checkTokenUri } from './token-uri-test'
 
 describe('STokensDescriptor', () => {
 	const provider = new MockProvider()
@@ -21,7 +21,13 @@ describe('STokensDescriptor', () => {
 			const property = provider.createEmptyWallet().address
 			const amount = 10
 			const historical = 30
-			const data = await testData.getStakingPosition(address1, property, amount, 20, historical)
+			const data = await testData.getStakingPosition(
+				address1,
+				property,
+				amount,
+				20,
+				historical
+			)
 			const t = await sTokensDescriptor.getTokenURI(data)
 			checkTokenUri(t, property, amount, historical)
 		})

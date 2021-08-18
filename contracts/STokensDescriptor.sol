@@ -10,7 +10,12 @@ contract STokensDescriptor {
 	using Base64 for bytes;
 	using AddressLib for address;
 	using Strings for uint256;
-	function getTokenURI(ISTokensManager.StakingPosition memory _position) public pure returns (string memory) {
+
+	function getTokenURI(ISTokensManager.StakingPosition memory _position)
+		public
+		pure
+		returns (string memory)
+	{
 		string memory name = string(
 			abi.encodePacked(
 				"Dev Protocol sTokens - ",
@@ -38,22 +43,23 @@ contract STokensDescriptor {
 				'</tspan></text><defs><linearGradient id=\\"paint0_linear\\" x1=\\"0\\" y1=\\"0\\" x2=\\"290\\" y2=\\"500\\" gradientUnits=\\"userSpaceOnUse\\"><stop stop-color=\\"#00D0FD\\"/><stop offset=\\"0.151042\\" stop-color=\\"#4889F5\\"/><stop offset=\\"0.552083\\" stop-color=\\"#D500E6\\"/><stop offset=\\"1\\" stop-color=\\"#FF3815\\"/></linearGradient></defs></svg>'
 			)
 		);
-		return string(
-			abi.encodePacked(
-				"data:application/json;base64,",
-				bytes(
-					abi.encodePacked(
-						"{\"name\":\"",
-						name,
-						"\", \"description\":\"",
-						description,
-						"\", \"image\": \"",
-						"data:image/svg+xml;base64,",
-						image,
-						"\"}"
-					)
-				).encode()
-			)
-		);
+		return
+			string(
+				abi.encodePacked(
+					"data:application/json;base64,",
+					bytes(
+						abi.encodePacked(
+							'{"name":"',
+							name,
+							'", "description":"',
+							description,
+							'", "image": "',
+							"data:image/svg+xml;base64,",
+							image,
+							'"}'
+						)
+					).encode()
+				)
+			);
 	}
 }

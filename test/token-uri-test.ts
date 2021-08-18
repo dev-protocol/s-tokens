@@ -1,27 +1,39 @@
 import { expect } from 'chai'
 import { Buffer } from 'buffer'
 
-export const checkTokenUri = (tokenUri: string, property: string, amount: number, historical: number): void => {
+export const checkTokenUri = (
+	tokenUri: string,
+	property: string,
+	amount: number,
+	historical: number
+): void => {
 	const uriInfo = tokenUri.split(',')
 	expect(uriInfo.length).to.equal(2)
 	expect(uriInfo[0]).to.equal('data:application/json;base64')
-	const decodedData = Buffer.from(uriInfo[1], 'base64').toString();
-	const details = JSON.parse(decodedData);
-	const {name, description, image} = details
+	const decodedData = Buffer.from(uriInfo[1], 'base64').toString()
+	const details = JSON.parse(decodedData)
+	const { name, description, image } = details
 	checkName(name, property, amount, historical)
 	checkDescription(description, property)
 	checkImage(image, property)
-
 }
 
-const checkName = (name: string, property: string, amount: number, historical: number): void => {
-	expect(name).to.equal(`Dev Protocol sTokens - ${property} - ${amount} DEV - ${historical}`)
+const checkName = (
+	name: string,
+	property: string,
+	amount: number,
+	historical: number
+): void => {
+	expect(name).to.equal(
+		`Dev Protocol sTokens - ${property} - ${amount} DEV - ${historical}`
+	)
 }
 
 const checkDescription = (description: string, property: string): void => {
-	const testDescription = 'This NFT represents a staking position in a Dev Protocol Property tokens. The owner of this NFT can modify or redeem the position.\n'
-	+  `Property Address: ${property}\n\n`
-	+ '⚠ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.'
+	const testDescription =
+		'This NFT represents a staking position in a Dev Protocol Property tokens. The owner of this NFT can modify or redeem the position.\n' +
+		`Property Address: ${property}\n\n` +
+		'⚠ DISCLAIMER: Due diligence is imperative when assessing this NFT. Make sure token addresses match the expected tokens, as token symbols may be imitated.'
 	expect(description).to.equal(testDescription)
 }
 

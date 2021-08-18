@@ -15,7 +15,10 @@ describe('STokensManagerStorage', () => {
 	let testData: Contract
 
 	beforeEach(async () => {
-		sTokensManagerStorage = await deployContract(wallet, STokensManagerStorageTest)
+		sTokensManagerStorage = await deployContract(
+			wallet,
+			STokensManagerStorageTest
+		)
 		await sTokensManagerStorage.createStorage()
 		testData = await deployContract(wallet, TestData)
 	})
@@ -32,9 +35,15 @@ describe('STokensManagerStorage', () => {
 		it('get struct value', async () => {
 			const address1 = provider.createEmptyWallet().address
 			const address2 = provider.createEmptyWallet().address
-			const data = await testData.getStakingPosition(address1, address2, 10, 20, 30)
+			const data = await testData.getStakingPosition(
+				address1,
+				address2,
+				10,
+				20,
+				30
+			)
 			await sTokensManagerStorage.setStoragePositionsV1Test(9, data, {
-				gasLimit: 1200000
+				gasLimit: 1200000,
 			})
 			const tmp = await sTokensManagerStorage.getStoragePositionsV1(9)
 			expect(tmp.owner).to.equal(address1)

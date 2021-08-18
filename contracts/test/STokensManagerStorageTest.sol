@@ -5,7 +5,10 @@ import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTok
 import {STokensManagerStorage} from "../STokensManagerStorage.sol";
 
 contract STokensManagerStorageTest is STokensManagerStorage {
-	function setStoragePositionsV1Test(uint256 _tokenId, ISTokensManager.StakingPosition calldata _position) public {
+	function setStoragePositionsV1Test(
+		uint256 _tokenId,
+		ISTokensManager.StakingPosition calldata _position
+	) public {
 		setStoragePositionsV1(_tokenId, _position);
 	}
 }

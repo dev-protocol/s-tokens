@@ -6,7 +6,6 @@
 	"scripts": {
 		"test": "mocha --require ts-node/register 'test/**/*.ts' --timeout 300000 --parallel",
 		"pretest": "yarn generate",
-		"test2": "mocha --require ts-node/register 'test/**/*.ts' --timeout 300000",
 		"generate": "waffle waffle-config.json",
 		"pregenerate": "yarn clean",
 		"lint": "yarn lint:eslint && yarn lint:solhint && yarn lint:format",
