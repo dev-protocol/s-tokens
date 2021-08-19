@@ -1,18 +1,16 @@
 import { Contract } from 'ethers'
-import { deployContract, MockProvider } from 'ethereum-waffle'
-import * as STokensDescriptor from '../build/STokensDescriptor.json'
-import * as TestData from '../build/TestData.json'
+import { MockProvider } from 'ethereum-waffle'
 import { checkTokenUri } from './token-uri-test'
+import { deploy } from './utils'
 
 describe('STokensDescriptor', () => {
 	const provider = new MockProvider()
-	const [wallet] = provider.getWallets()
 	let sTokensDescriptor: Contract
 	let testData: Contract
 
 	beforeEach(async () => {
-		sTokensDescriptor = await deployContract(wallet, STokensDescriptor)
-		testData = await deployContract(wallet, TestData)
+		sTokensDescriptor = await deploy('STokensDescriptor')
+		testData = await deploy('TestData')
 	})
 
 	describe('get descriptor data', () => {

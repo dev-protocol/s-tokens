@@ -71,3 +71,7 @@ types
 
 # use yarn
 package-lock.json
+
+#Hardhat files
+cache
+artifacts
