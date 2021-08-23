@@ -9,7 +9,8 @@ contract TestData {
 		address _property,
 		uint256 _amount,
 		uint256 _price,
-		uint256 _historical
+		uint256 _cumulativeReward,
+		uint256 _pendingReward
 	) external pure returns (ISTokensManager.StakingPosition memory) {
 		return
 			ISTokensManager.StakingPosition(
@@ -17,7 +18,8 @@ contract TestData {
 				_property,
 				_amount,
 				_price,
-				_historical
+				_cumulativeReward,
+				_pendingReward
 			);
 	}
 
@@ -40,14 +42,16 @@ contract TestData {
 		uint256 _tokenId,
 		uint256 _amount,
 		uint256 _price,
-		uint256 _historical
+		uint256 _cumulativeReward,
+		uint256 _pendingReward
 	) external pure returns (ISTokensManager.UpdateParams memory) {
 		return
 			ISTokensManager.UpdateParams(
 				_tokenId,
 				_amount,
 				_price,
-				_historical
+				_cumulativeReward,
+				_pendingReward
 			);
 	}
 }

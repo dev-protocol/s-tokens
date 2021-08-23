@@ -18,16 +18,17 @@ describe('STokensDescriptor', () => {
 			const address1 = provider.createEmptyWallet().address
 			const property = provider.createEmptyWallet().address
 			const amount = 10
-			const historical = 30
+			const cumulativeReward = 30
 			const data = await testData.getStakingPosition(
 				address1,
 				property,
 				amount,
 				20,
-				historical
+				cumulativeReward,
+				40
 			)
 			const t = await sTokensDescriptor.getTokenURI(data)
-			checkTokenUri(t, property, amount, historical)
+			checkTokenUri(t, property, amount, cumulativeReward)
 		})
 	})
 })

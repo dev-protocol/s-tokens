@@ -13,6 +13,8 @@ contract STokenManagerProxy is ERC1967Proxy {
 	}
 
 	function upgradeTo(address newImplementation) external {
+		// TODO アクセス制御
+		// TODO upgradeTo意外にいらないのか
 		_upgradeTo(newImplementation);
 	}
 }

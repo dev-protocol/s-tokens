@@ -6,12 +6,10 @@ import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {IAddressConfig} from "./IAddressConfig.sol";
-import {STokensManagerStorage} from "./STokensManagerStorage.sol";
 import {ISTokensDescriptor} from "./ISTokensDescriptor.sol";
 
 contract STokensManager is
 	ISTokensManager,
-	STokensManagerStorage,
 	ERC721,
 	Ownable
 {
@@ -19,9 +17,10 @@ contract STokensManager is
 	Counters.Counter private _tokenIds;
 	address public config;
 	address public descriptor;
+	mapping(bytes32 => bytes) private bytesStorage;
 
 	// TODO この名前でいいか確認する
-	constructor(address _config) ERC721("SDev", "SDEV") {
+	constructor(address _config) ERC721("Dev Protocol sTokens V1", "DEV-STOKENS-V1") {
 		config = _config;
 	}
 
@@ -45,27 +44,29 @@ contract STokensManager is
 	{
 		require(_exists(_tokenId), "not found");
 		ISTokensDescriptor sTokensDescriptor = ISTokensDescriptor(descriptor);
-		return sTokensDescriptor.getTokenURI(getStoragePositionsV1(_tokenId));
+		return sTokensDescriptor.getTokenURI(getStoragePositionV1(_tokenId));
 	}
 
 	function mint(MintParams calldata _params)
 		external
 		onlyLockup
 		override
-		returns (uint256 tokenId, StakingPosition memory position)
+		returns (uint256, StakingPosition memory)
 	{
 		_tokenIds.increment();
 		uint256 newItemId = _tokenIds.current();
 		_safeMint(_params.owner, newItemId);
-		// TODO 0でいいのか後で確認する
 		StakingPosition memory newPosition = StakingPosition(
 			_params.owner,
 			_params.property,
 			_params.amount,
 			_params.price,
+			// TODO ここ0でいいか確認
+			0,
+			// TODO ここ0でいいか確認
 			0
 		);
-		setStoragePositionsV1(newItemId, newPosition);
+		setStoragePositionV1(newItemId, newPosition);
 		return (newItemId, newPosition);
 	}
 
@@ -73,24 +74,54 @@ contract STokensManager is
 		external
 		onlyLockup
 		override
-		returns (StakingPosition memory position)
+		returns (StakingPosition memory)
 	{
-		StakingPosition memory currentPosition = getStoragePositionsV1(
+		require(_exists(_params.tokenId), "not found");
+		StakingPosition memory currentPosition = getStoragePositionV1(
 			_params.tokenId
 		);
 		currentPosition.amount = _params.amount;
 		currentPosition.price = _params.price;
-		currentPosition.historical = _params.historical;
-		setStoragePositionsV1(_params.tokenId, currentPosition);
+		currentPosition.cumulativeReward = _params.cumulativeReward;
+		currentPosition.pendingReward = _params.pendingReward;
+		setStoragePositionV1(_params.tokenId, currentPosition);
 		return currentPosition;
 	}
 
-	function positions(uint256 _tokenId)
+	function position(uint256 _tokenId)
 		external
 		view
 		override
-		returns (StakingPosition memory position)
+		returns (StakingPosition memory)
 	{
-		return getStoragePositionsV1(_tokenId);
+		return getStoragePositionV1(_tokenId);
+	}
+
+	function getStoragePositionV1(uint256 _tokenId)
+		public
+		view
+		returns (StakingPosition memory)
+	{
+		bytes32 key = getStoragePositionV1Key(_tokenId);
+		bytes memory tmp = bytesStorage[key];
+		require(keccak256(tmp) != keccak256(bytes("")), "illegal token id");
+		return abi.decode(tmp, (StakingPosition));
+	}
+
+	function setStoragePositionV1(
+		uint256 _tokenId,
+		StakingPosition memory _position
+	) private {
+		bytes32 key = getStoragePositionV1Key(_tokenId);
+		bytes memory tmp = abi.encode(_position);
+		bytesStorage[key] = tmp;
+	}
+
+	function getStoragePositionV1Key(uint256 _tokenId)
+		private
+		pure
+		returns (bytes32)
+	{
+		return keccak256(abi.encodePacked("_positionsV1", _tokenId));
 	}
 }

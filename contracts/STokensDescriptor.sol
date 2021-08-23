@@ -25,7 +25,9 @@ contract STokensDescriptor is ISTokensDescriptor {
 				_position.amount.toString(),
 				" DEV",
 				" - ",
-				_position.historical.toString()
+				// TODO historicalが亡くなった
+				// cumulativeRewardでいいのかどうか
+				_position.cumulativeReward.toString()
 			)
 		);
 		string memory description = string(

@@ -5,7 +5,7 @@ export const checkTokenUri = (
 	tokenUri: string,
 	property: string,
 	amount: number,
-	historical: number
+	cumulativeReward: number
 ): void => {
 	const uriInfo = tokenUri.split(',')
 	expect(uriInfo.length).to.equal(2)
@@ -13,7 +13,7 @@ export const checkTokenUri = (
 	const decodedData = Buffer.from(uriInfo[1], 'base64').toString()
 	const details = JSON.parse(decodedData)
 	const { name, description, image } = details
-	checkName(name, property, amount, historical)
+	checkName(name, property, amount, cumulativeReward)
 	checkDescription(description, property)
 	checkImage(image, property)
 }
@@ -22,10 +22,10 @@ const checkName = (
 	name: string,
 	property: string,
 	amount: number,
-	historical: number
+	cumulativeReward: number
 ): void => {
 	expect(name).to.equal(
-		`Dev Protocol sTokens - ${property} - ${amount} DEV - ${historical}`
+		`Dev Protocol sTokens - ${property} - ${amount} DEV - ${cumulativeReward}`
 	)
 }
 
