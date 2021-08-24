@@ -13,8 +13,9 @@ contract STokensDescriptor is ISTokensDescriptor {
 	using Strings for uint256;
 
 	function getTokenURI(ISTokensManager.StakingPosition memory _position)
-		external override
+		public
 		pure
+		override
 		returns (string memory)
 	{
 		string memory name = string(

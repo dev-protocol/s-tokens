@@ -29,13 +29,7 @@ contract TestData {
 		uint256 _amount,
 		uint256 _price
 	) external pure returns (ISTokensManager.MintParams memory) {
-		return
-			ISTokensManager.MintParams(
-				_owner,
-				_property,
-				_amount,
-				_price
-			);
+		return ISTokensManager.MintParams(_owner, _property, _amount, _price);
 	}
 
 	function getUpdateParams(

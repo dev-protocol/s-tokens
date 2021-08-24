@@ -6,21 +6,18 @@ import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {IAddressConfig} from "./IAddressConfig.sol";
-import {ISTokensDescriptor} from "./ISTokensDescriptor.sol";
+import {STokensDescriptor} from "./STokensDescriptor.sol";
 
-contract STokensManager is
-	ISTokensManager,
-	ERC721,
-	Ownable
-{
+contract STokensManager is ISTokensManager, STokensDescriptor, ERC721, Ownable {
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
 	address public config;
 	address public descriptor;
 	mapping(bytes32 => bytes) private bytesStorage;
 
-	// TODO この名前でいいか確認する
-	constructor(address _config) ERC721("Dev Protocol sTokens V1", "DEV-STOKENS-V1") {
+	constructor(address _config)
+		ERC721("Dev Protocol sTokens V1", "DEV-STOKENS-V1")
+	{
 		config = _config;
 	}
 
@@ -32,10 +29,6 @@ contract STokensManager is
 		_;
 	}
 
-	function setDescriptor(address _descriptor) external onlyOwner {
-		descriptor = _descriptor;
-	}
-
 	function tokenURI(uint256 _tokenId)
 		public
 		view
@@ -43,14 +36,13 @@ contract STokensManager is
 		returns (string memory)
 	{
 		require(_exists(_tokenId), "not found");
-		ISTokensDescriptor sTokensDescriptor = ISTokensDescriptor(descriptor);
-		return sTokensDescriptor.getTokenURI(getStoragePositionV1(_tokenId));
+		return getTokenURI(getStoragePositionV1(_tokenId));
 	}
 
 	function mint(MintParams calldata _params)
 		external
-		onlyLockup
 		override
+		onlyLockup
 		returns (uint256, StakingPosition memory)
 	{
 		_tokenIds.increment();
@@ -72,8 +64,8 @@ contract STokensManager is
 
 	function update(UpdateParams calldata _params)
 		external
-		onlyLockup
 		override
+		onlyLockup
 		returns (StakingPosition memory)
 	{
 		require(_exists(_params.tokenId), "not found");
@@ -98,7 +90,7 @@ contract STokensManager is
 	}
 
 	function getStoragePositionV1(uint256 _tokenId)
-		public
+		private
 		view
 		returns (StakingPosition memory)
 	{

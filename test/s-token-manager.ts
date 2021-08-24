@@ -11,7 +11,6 @@ import { MockProvider, solidity } from 'ethereum-waffle'
 import { deploy, deployWithArg } from './utils'
 import { checkTokenUri } from './token-uri-test'
 
-
 use(solidity)
 
 describe('STokensManager', () => {
@@ -20,23 +19,29 @@ describe('STokensManager', () => {
 		testData = await deploy('TestData')
 	})
 
-	const init = async (): Promise<[Contract, Contract, Contract, Contract]> => {
+	const init = async (): Promise<[Contract, Contract, Contract]> => {
 		const [, user] = await ethers.getSigners()
 		const addressConfig = await deploy('AddressConfigTest')
-		const sTokensManager = await deployWithArg('STokensManager', addressConfig.address)
+		const sTokensManager = await deployWithArg(
+			'STokensManager',
+			addressConfig.address
+		)
 		const lockup = await deployWithArg('LockupTest', sTokensManager.address)
 		await addressConfig.setLockup(lockup.address)
-		const sTokensDescriptor = await deploy('STokensDescriptor')
-		await sTokensManager.setDescriptor(sTokensDescriptor.address)
 		const sTokensManagerUser = sTokensManager.connect(user)
-		return [sTokensManager, sTokensManagerUser, sTokensDescriptor, lockup]
+		return [sTokensManager, sTokensManagerUser, lockup]
 	}
 
 	const createMintParams = async (): Promise<any> => {
 		const provider = new MockProvider()
 		const owner = provider.createEmptyWallet()
 		const property = provider.createEmptyWallet()
-		const params = await testData.getMintParams(owner.address, property.address, 10, 20)
+		const params = await testData.getMintParams(
+			owner.address,
+			property.address,
+			10,
+			20
+		)
 		return params
 	}
 
@@ -59,32 +64,13 @@ describe('STokensManager', () => {
 			expect(symbol).to.equal('DEV-STOKENS-V1')
 		})
 	})
-	describe('setDescriptor', () => {
-		describe('success', () => {
-			it('set discriptor address', async () => {
-				const [sTokensManager, , sTokensDescriptor] = await init()
-				const descriotorAddress = await sTokensManager.descriptor()
-				expect(descriotorAddress).to.equal(sTokensDescriptor.address)
-			})
-		})
-		describe('fail', () => {
-			it('get token symbol', async () => {
-				const [, sTokensManagerUser] = await init()
-				const provider = new MockProvider()
-				const tmp = provider.createEmptyWallet()
-				await expect(sTokensManagerUser.setDescriptor(tmp.address)).to.be.revertedWith(
-					'Ownable: caller is not the owner'
-				)
-			})
-		})
-	})
 	describe('tokenURI', () => {
 		describe('success', () => {
 			it('get token uri', async () => {
-				const [sTokensManager, , ,lockup] = await init()
+				const [sTokensManager, , lockup] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(mintParam, {
-					gasLimit: 1200000
+					gasLimit: 1200000,
 				})
 				const filter = sTokensManager.filters.Transfer()
 				const events = await sTokensManager.queryFilter(filter)
@@ -96,19 +82,17 @@ describe('STokensManager', () => {
 		describe('fail', () => {
 			it('get token symbol', async () => {
 				const [sTokensManager] = await init()
-				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith(
-					'not found'
-				)
+				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith('not found')
 			})
 		})
 	})
 	describe('mint', () => {
 		describe('success', () => {
 			it('mint nft', async () => {
-				const [sTokensManager, , ,lockup] = await init()
+				const [sTokensManager, , lockup] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(mintParam, {
-					gasLimit: 1200000
+					gasLimit: 1200000,
 				})
 				const tokenId = await sTokensManager.balanceOf(mintParam.owner)
 				expect(tokenId.toString()).to.equal('1')
@@ -118,14 +102,12 @@ describe('STokensManager', () => {
 				expect(latestTokenId.toString()).to.equal('1')
 				const latestPosition = await lockup.latestPosition()
 				expect(latestPosition.owner).to.equal(mintParam.owner)
-
-
 			})
 			it('generate event', async () => {
-				const [sTokensManager, , , lockup] = await init()
+				const [sTokensManager, , lockup] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(mintParam, {
-					gasLimit: 1200000
+					gasLimit: 1200000,
 				})
 				const filter = sTokensManager.filters.Transfer()
 				const events = await sTokensManager.queryFilter(filter)
@@ -137,17 +119,17 @@ describe('STokensManager', () => {
 				expect(tokenId).to.equal('1')
 			})
 			it('The counter will be incremented.', async () => {
-				const [sTokensManager, , , lockup] = await init()
+				const [sTokensManager, , lockup] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(mintParam, {
-					gasLimit: 1200000
+					gasLimit: 1200000,
 				})
 				const filter = sTokensManager.filters.Transfer()
 				const events = await sTokensManager.queryFilter(filter)
 				const tokenId = events[0].args!.tokenId.toString()
 				expect(tokenId).to.equal('1')
 				await lockup.executeMint(mintParam, {
-					gasLimit: 1200000
+					gasLimit: 1200000,
 				})
 				const eventsSecound = await sTokensManager.queryFilter(filter)
 				const tokenIdSecound = eventsSecound[1].args!.tokenId.toString()
@@ -172,51 +154,34 @@ describe('STokensManager', () => {
 		})
 	})
 	describe('update', () => {
-		// Describe('success', () => {
-		// 	it('update data', async () => {
-		// 		const [, sTokensManagerLockup] = await init()
-		// 		const mintParam = await createMintParams()
-		// 		await sTokensManagerLockup.mint(mintParam, {
-		// 			gasLimit: 1200000
-		// 		})
-		// 		const tokenId = await sTokensManagerLockup.balanceOf(mintParam.owner)
-		// 		expect(tokenId.toString()).to.equal('1')
-		// 		const owner = await sTokensManagerLockup.ownerOf(1)
-		// 		expect(owner).to.equal(mintParam.owner)
-		// 	})
-		// 	it('generate event', async () => {
-		// 		const [, sTokensManagerLockup] = await init()
-		// 		const mintParam = await createMintParams()
-		// 		await sTokensManagerLockup.mint(mintParam, {
-		// 			gasLimit: 1200000
-		// 		})
-		// 		const filter = sTokensManagerLockup.filters.Transfer()
-		// 		const events = await sTokensManagerLockup.queryFilter(filter)
-		// 		const from = events[0].args!.from
-		// 		const to = events[0].args!.to
-		// 		const tokenId = events[0].args!.tokenId.toString()
-		// 		expect(from).to.equal(constants.AddressZero)
-		// 		expect(to).to.equal(mintParam.owner)
-		// 		expect(tokenId).to.equal('1')
-		// 	})
-		// 	it('The counter will be incremented.', async () => {
-		// 		const [, sTokensManagerLockup] = await init()
-		// 		const mintParam = await createMintParams()
-		// 		await sTokensManagerLockup.mint(mintParam, {
-		// 			gasLimit: 1200000
-		// 		})
-		// 		const filter = sTokensManagerLockup.filters.Transfer()
-		// 		const events = await sTokensManagerLockup.queryFilter(filter)
-		// 		const tokenId = events[0].args!.tokenId.toString()
-		// 		expect(tokenId).to.equal('1')
-		// 		await sTokensManagerLockup.mint(mintParam, {
-		// 			gasLimit: 1200000
-		// 		})
-		// 		const eventsSecound = await sTokensManagerLockup.queryFilter(filter)
-		// 		const tokenIdSecound = eventsSecound[1].args!.tokenId.toString()
-		// 		expect(tokenIdSecound).to.equal('2')
-		// 	})
-		// })
+		describe('success', () => {
+			it('update data', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(mintParam, {
+					gasLimit: 1200000,
+				})
+				const latestTokenId = await lockup.latestTokenId()
+				const beforePosition = await sTokensManager.position(latestTokenId)
+				expect(beforePosition.owner).to.equal(mintParam.owner)
+				expect(beforePosition.property).to.equal(mintParam.property)
+				expect(beforePosition.amount).to.equal(mintParam.amount)
+				expect(beforePosition.price).to.equal(mintParam.price)
+				expect(beforePosition.cumulativeReward).to.equal(0)
+				expect(beforePosition.pendingReward).to.equal(0)
+				const updateParam = await createUpdateParams(latestTokenId)
+				await lockup.executeUpdate(updateParam)
+				const afterPosition = await lockup.latestPosition()
+				expect(afterPosition.owner).to.equal(mintParam.owner)
+				expect(afterPosition.property).to.equal(mintParam.property)
+				expect(afterPosition.amount).to.equal(updateParam.amount)
+				expect(afterPosition.price).to.equal(updateParam.price)
+				expect(afterPosition.cumulativeReward).to.equal(
+					updateParam.cumulativeReward
+				)
+				expect(afterPosition.pendingReward).to.equal(updateParam.pendingReward)
+			})
+		})
 		describe('fail', () => {
 			it('If the owner runs it, an error will occur.', async () => {
 				const [sTokensManager] = await init()
@@ -233,7 +198,7 @@ describe('STokensManager', () => {
 				)
 			})
 			it('The data to be updated does not exist.', async () => {
-				const [, , , lockup] = await init()
+				const [, , lockup] = await init()
 				const updateParam = await createUpdateParams(193746)
 				await expect(lockup.executeUpdate(updateParam)).to.be.revertedWith(
 					'not found'
@@ -242,42 +207,30 @@ describe('STokensManager', () => {
 		})
 	})
 
-	describe('getStoragePositionV1, ', () => {
+	describe('position', () => {
 		describe('success', () => {
 			it('get data', async () => {
-				const [sTokensManager, , ,lockup] = await init()
+				const [sTokensManager, , lockup] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(mintParam, {
-					gasLimit: 1200000
+					gasLimit: 1200000,
 				})
-				const posicion = await sTokensManager.getStoragePositionV1(1)
-				expect(posicion.owner).to.equal(mintParam.owner)
-				expect(posicion.property).to.equal(mintParam.property)
-				expect(posicion.amount).to.equal(mintParam.amount)
-				expect(posicion.price).to.equal(mintParam.price)
-				expect(posicion.cumulativeReward).to.equal(0)
-				expect(posicion.pendingReward).to.equal(0)
+				const position = await sTokensManager.position(1)
+				expect(position.owner).to.equal(mintParam.owner)
+				expect(position.property).to.equal(mintParam.property)
+				expect(position.amount).to.equal(mintParam.amount)
+				expect(position.price).to.equal(mintParam.price)
+				expect(position.cumulativeReward).to.equal(0)
+				expect(position.pendingReward).to.equal(0)
 			})
 		})
 		describe('fail', () => {
 			it('deta is not found', async () => {
 				const [sTokensManager] = await init()
-				await expect(sTokensManager.getStoragePositionV1(12345)).to.be.revertedWith(
+				await expect(sTokensManager.position(12345)).to.be.revertedWith(
 					'illegal token id'
 				)
 			})
 		})
 	})
 })
-
-
-
-// // TODO _upgradeToAndCall、_upgradeToAndCallSecureは必要ない
-// // 　　新しいコントラクトの関数実行したければ、upgradeToしてから独自にやってねという想定
-
-// //
-
-// // adminをlockupにするか。
-// // proxy経由でsetApprovalForAll読んだ時、_msgSender()は何が取得できるのか
-// // デリゲートコールしてて、ストレージはproxyのものだから、proxyじゃなくて通常のウォレットのアドレスが入りそうな気がするが
-// // (むしろそうじゃないと詰む)
