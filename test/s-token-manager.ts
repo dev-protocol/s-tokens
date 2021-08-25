@@ -2,13 +2,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable new-cap */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
 import { Contract, constants } from 'ethers'
-import { MockProvider, solidity } from 'ethereum-waffle'
-import { deploy, deployWithArg } from './utils'
+import { solidity } from 'ethereum-waffle'
+import { deploy, deployWithArg, createMintParams, createUpdateParams } from './utils'
 import { checkTokenUri } from './token-uri-test'
 
 use(solidity)
@@ -22,32 +20,12 @@ describe('STokensManager', () => {
 	const init = async (): Promise<[Contract, Contract, Contract]> => {
 		const [, user] = await ethers.getSigners()
 		const addressConfig = await deploy('AddressConfigTest')
-		const sTokensManager = await deployWithArg(
-			'STokensManager',
-			addressConfig.address
-		)
+		const sTokensManager = await deploy('STokensManager')
+		await sTokensManager.initialize(addressConfig.address)
 		const lockup = await deployWithArg('LockupTest', sTokensManager.address)
 		await addressConfig.setLockup(lockup.address)
 		const sTokensManagerUser = sTokensManager.connect(user)
 		return [sTokensManager, sTokensManagerUser, lockup]
-	}
-
-	const createMintParams = async (): Promise<any> => {
-		const provider = new MockProvider()
-		const owner = provider.createEmptyWallet()
-		const property = provider.createEmptyWallet()
-		const params = await testData.getMintParams(
-			owner.address,
-			property.address,
-			10,
-			20
-		)
-		return params
-	}
-
-	const createUpdateParams = async (tokenId = 1): Promise<any> => {
-		const params = await testData.getUpdateParams(tokenId, 100, 200, 300, 400)
-		return params
 	}
 
 	describe('name', () => {
@@ -68,7 +46,7 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('get token uri', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await lockup.executeMint(mintParam, {
 					gasLimit: 1200000,
 				})
@@ -90,7 +68,7 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('mint nft', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await lockup.executeMint(mintParam, {
 					gasLimit: 1200000,
 				})
@@ -105,7 +83,7 @@ describe('STokensManager', () => {
 			})
 			it('generate event', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await lockup.executeMint(mintParam, {
 					gasLimit: 1200000,
 				})
@@ -120,7 +98,7 @@ describe('STokensManager', () => {
 			})
 			it('The counter will be incremented.', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await lockup.executeMint(mintParam, {
 					gasLimit: 1200000,
 				})
@@ -139,14 +117,14 @@ describe('STokensManager', () => {
 		describe('fail', () => {
 			it('If the owner runs it, an error will occur.', async () => {
 				const [sTokensManager] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await expect(sTokensManager.mint(mintParam)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
 			it('If the user runs it, an error will occur.', async () => {
 				const [, sTokenManagerUser] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await expect(sTokenManagerUser.mint(mintParam)).to.be.revertedWith(
 					'illegal access'
 				)
@@ -157,7 +135,7 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('update data', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await lockup.executeMint(mintParam, {
 					gasLimit: 1200000,
 				})
@@ -169,7 +147,7 @@ describe('STokensManager', () => {
 				expect(beforePosition.price).to.equal(mintParam.price)
 				expect(beforePosition.cumulativeReward).to.equal(0)
 				expect(beforePosition.pendingReward).to.equal(0)
-				const updateParam = await createUpdateParams(latestTokenId)
+				const updateParam = await createUpdateParams(testData, latestTokenId)
 				await lockup.executeUpdate(updateParam)
 				const afterPosition = await lockup.latestPosition()
 				expect(afterPosition.owner).to.equal(mintParam.owner)
@@ -185,21 +163,21 @@ describe('STokensManager', () => {
 		describe('fail', () => {
 			it('If the owner runs it, an error will occur.', async () => {
 				const [sTokensManager] = await init()
-				const updateParam = await createUpdateParams()
+				const updateParam = await createUpdateParams(testData)
 				await expect(sTokensManager.update(updateParam)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
 			it('If the user runs it, an error will occur.', async () => {
 				const [, sTokenManagerUser] = await init()
-				const updateParam = await createUpdateParams()
+				const updateParam = await createUpdateParams(testData)
 				await expect(sTokenManagerUser.update(updateParam)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
 			it('The data to be updated does not exist.', async () => {
 				const [, , lockup] = await init()
-				const updateParam = await createUpdateParams(193746)
+				const updateParam = await createUpdateParams(testData, 193746)
 				await expect(lockup.executeUpdate(updateParam)).to.be.revertedWith(
 					'not found'
 				)
@@ -211,7 +189,7 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('get data', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams()
+				const mintParam = await createMintParams(testData)
 				await lockup.executeMint(mintParam, {
 					gasLimit: 1200000,
 				})

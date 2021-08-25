@@ -5,17 +5,15 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {AddressLib} from "@devprotocol/util-contracts/contracts/utils/AddressLib.sol";
 import {Base64} from "@devprotocol/util-contracts/contracts/utils/Base64.sol";
-import {ISTokensDescriptor} from "./ISTokensDescriptor.sol";
 
-contract STokensDescriptor is ISTokensDescriptor {
+contract STokensDescriptor {
 	using Base64 for bytes;
 	using AddressLib for address;
 	using Strings for uint256;
 
 	function getTokenURI(ISTokensManager.StakingPosition memory _position)
-		public
+		internal
 		pure
-		override
 		returns (string memory)
 	{
 		string memory name = string(

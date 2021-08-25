@@ -2,8 +2,9 @@
 pragma solidity 0.8.4;
 
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract STokenManagerProxy is ERC1967Proxy {
+contract STokensManagerProxy is ERC1967Proxy, Ownable {
 	constructor(address _logic, bytes memory _data)
 		ERC1967Proxy(_logic, _data)
 	{}
@@ -12,9 +13,7 @@ contract STokenManagerProxy is ERC1967Proxy {
 		return _implementation();
 	}
 
-	function upgradeTo(address newImplementation) external {
-		// TODO アクセス制御
-		// TODO upgradeTo意外にいらないのか
+	function upgradeTo(address newImplementation) external onlyOwner {
 		_upgradeTo(newImplementation);
 	}
 }

@@ -1,25 +1,18 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity 0.8.4;
 
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {IAddressConfig} from "./IAddressConfig.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 
-contract STokensManager is ISTokensManager, STokensDescriptor, ERC721, Ownable {
+contract STokensManager is ISTokensManager, STokensDescriptor, ERC721Upgradeable, OwnableUpgradeable {
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
 	address public config;
-	address public descriptor;
 	mapping(bytes32 => bytes) private bytesStorage;
-
-	constructor(address _config)
-		ERC721("Dev Protocol sTokens V1", "DEV-STOKENS-V1")
-	{
-		config = _config;
-	}
 
 	modifier onlyLockup() {
 		require(
@@ -27,6 +20,12 @@ contract STokensManager is ISTokensManager, STokensDescriptor, ERC721, Ownable {
 			"illegal access"
 		);
 		_;
+	}
+
+	function initialize(address _config) external override initializer {
+		__Ownable_init();
+		__ERC721_init("Dev Protocol sTokens V1", "DEV-STOKENS-V1");
+		config = _config;
 	}
 
 	function tokenURI(uint256 _tokenId)
