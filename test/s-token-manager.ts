@@ -36,9 +36,9 @@ describe('STokensManager', () => {
 	describe('initialize', () => {
 		it('The initialize function can only be executed once.', async () => {
 			const [sTokensManager] = await init()
-			await expect(sTokensManager.initialize(constants.AddressZero)).to.be.revertedWith(
-				'Initializable: contract is already initialized'
-			)
+			await expect(
+				sTokensManager.initialize(constants.AddressZero)
+			).to.be.revertedWith('Initializable: contract is already initialized')
 		})
 	})
 
