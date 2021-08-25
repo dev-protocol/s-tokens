@@ -5,7 +5,7 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
-import {IAddressConfig} from "./IAddressConfig.sol";
+import {IAddressConfig} from "@devprotocol/protocol/contracts/interface/IAddressConfig.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 
 contract STokensManager is
