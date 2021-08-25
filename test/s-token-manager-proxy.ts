@@ -3,7 +3,12 @@ import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
 import { Contract, constants } from 'ethers'
 import { solidity } from 'ethereum-waffle'
-import { deploy, deployWithArg, deployWith2Arg, createMintParams } from './utils'
+import {
+	deploy,
+	deployWithArg,
+	deployWith2Arg,
+	createMintParams,
+} from './utils'
 import { checkTokenUri } from './token-uri-test'
 
 use(solidity)
@@ -14,14 +19,22 @@ describe('STokensManagerProxy', () => {
 		testData = await deploy('TestData')
 	})
 
-	const init = async (): Promise<[Contract, Contract, Contract, Contract, Contract]> => {
+	const init = async (): Promise<
+		[Contract, Contract, Contract, Contract, Contract]
+	> => {
 		const addressConfig = await deploy('AddressConfigTest')
 		const sTokensManager = await deploy('STokensManager')
 		const data = ethers.utils.arrayify('0x')
-		const proxy = await deployWith2Arg('STokensManagerProxy', sTokensManager.address, data)
+		const proxy = await deployWith2Arg(
+			'STokensManagerProxy',
+			sTokensManager.address,
+			data
+		)
 		const lockup = await deployWithArg('LockupTest', proxy.address)
 		await addressConfig.setLockup(lockup.address)
-		const sTokenManagerFactory = await ethers.getContractFactory('STokensManager')
+		const sTokenManagerFactory = await ethers.getContractFactory(
+			'STokensManager'
+		)
 		const proxyDelegate = sTokenManagerFactory.attach(proxy.address)
 		await proxyDelegate.initialize(addressConfig.address)
 
@@ -49,7 +62,9 @@ describe('STokensManagerProxy', () => {
 				checkTokenUri(uriFirst, mintParam.property, mintParam.amount, 0)
 				const sTokensManagerSecound = await deploy('STokensManagerTest')
 				await proxy.upgradeTo(sTokensManagerSecound.address)
-				const sTokenManagerTestFactory = await ethers.getContractFactory('STokensManagerTest')
+				const sTokenManagerTestFactory = await ethers.getContractFactory(
+					'STokensManagerTest'
+				)
 				const proxyDelegateTest = sTokenManagerTestFactory.attach(proxy.address)
 				const uriSecound = await proxyDelegateTest.dummyFunc()
 				expect(uriSecound).to.equal(addressConfig.address)
@@ -93,11 +108,10 @@ describe('STokensManagerProxy', () => {
 				const [, user] = await ethers.getSigners()
 				const [proxy] = await init()
 				const proxyUser = proxy.connect(user)
-				await expect(proxyUser.upgradeTo(constants.AddressZero)).to.be.revertedWith(
-					'Ownable: caller is not the owner'
-				)
+				await expect(
+					proxyUser.upgradeTo(constants.AddressZero)
+				).to.be.revertedWith('Ownable: caller is not the owner')
 			})
-
 		})
 	})
 })

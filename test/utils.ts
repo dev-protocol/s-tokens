@@ -46,7 +46,10 @@ export const createMintParams = async (testData: Contract): Promise<any> => {
 	return params
 }
 
-export const createUpdateParams = async (testData: Contract, tokenId = 1): Promise<any> => {
+export const createUpdateParams = async (
+	testData: Contract,
+	tokenId = 1
+): Promise<any> => {
 	const params = await testData.getUpdateParams(tokenId, 100, 200, 300, 400)
 	return params
 }

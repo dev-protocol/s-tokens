@@ -8,7 +8,12 @@ import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTok
 import {IAddressConfig} from "./IAddressConfig.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 
-contract STokensManager is ISTokensManager, STokensDescriptor, ERC721Upgradeable, OwnableUpgradeable {
+contract STokensManager is
+	ISTokensManager,
+	STokensDescriptor,
+	ERC721Upgradeable,
+	OwnableUpgradeable
+{
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
 	address public config;

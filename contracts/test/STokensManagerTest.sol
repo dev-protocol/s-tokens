@@ -7,11 +7,7 @@ import {STokensManager} from "../STokensManager.sol";
 contract STokensManagerTest is STokensManager {
 	using AddressLib for address;
 
-	function dummyFunc()
-		public
-		view
-		returns (string memory)
-	{
+	function dummyFunc() public view returns (string memory) {
 		return config.toChecksumString();
 	}
 }

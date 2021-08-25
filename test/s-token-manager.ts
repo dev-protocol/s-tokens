@@ -6,7 +6,12 @@ import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
 import { Contract, constants } from 'ethers'
 import { solidity } from 'ethereum-waffle'
-import { deploy, deployWithArg, createMintParams, createUpdateParams } from './utils'
+import {
+	deploy,
+	deployWithArg,
+	createMintParams,
+	createUpdateParams,
+} from './utils'
 import { checkTokenUri } from './token-uri-test'
 
 use(solidity)
