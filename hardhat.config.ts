@@ -11,11 +11,11 @@ module.exports = {
 	networks: {
 		ropsten: {
 			url: `https://eth-rinkeby.alchemyapi.io/v2/${alchemyApiKey}`,
-			accounts: { mnemonic: mnemonic },
+			accounts: { mnemonic },
 		},
 		mainnet: {
 			url: `https://eth.alchemyapi.io/v2/${alchemyApiKey}`,
-			accounts: { mnemonic: mnemonic },
+			accounts: { mnemonic },
 		},
 	},
 	settings: {

@@ -93,15 +93,6 @@ describe('STokenmanagerProxy', () => {
 				const uriSecound = await proxyDelegate.tokenURI(tokenId)
 				checkTokenUri(uriSecound, mintParam.property, mintParam.amount, 0)
 			})
-
-			it('The data is stored in the proxy(OwnableUpgradeable)', async () => {
-				const [proxy, proxyDelegate, , , , proxyAdmin] = await init()
-				const owner = await proxyDelegate.owner()
-				const sTokensManagerSecound = await deploy('STokensManager')
-				await proxyAdmin.upgrade(proxy.address, sTokensManagerSecound.address)
-				const ownerSecond = await proxyDelegate.owner()
-				expect(owner).to.equal(ownerSecond)
-			})
 		})
 	})
 })

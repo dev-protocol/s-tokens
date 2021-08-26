@@ -3,7 +3,6 @@ pragma solidity 0.8.4;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {IAddressConfig} from "@devprotocol/protocol/contracts/interface/IAddressConfig.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
@@ -11,8 +10,7 @@ import {STokensDescriptor} from "./STokensDescriptor.sol";
 contract STokensManager is
 	ISTokensManager,
 	STokensDescriptor,
-	ERC721Upgradeable,
-	OwnableUpgradeable
+	ERC721Upgradeable
 {
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
@@ -28,7 +26,6 @@ contract STokensManager is
 	}
 
 	function initialize(address _config) external override initializer {
-		__Ownable_init();
 		__ERC721_init("Dev Protocol sTokens V1", "DEV-STOKENS-V1");
 		config = _config;
 	}
