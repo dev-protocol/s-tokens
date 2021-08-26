@@ -1,6 +1,5 @@
 import '@nomiclabs/hardhat-waffle'
-
-const privateKey = ''
+import secret from './secrets.json'
 
 module.exports = {
 	mocha: {
@@ -9,12 +8,12 @@ module.exports = {
 	solidity: '0.8.4',
 	networks: {
 		ropsten: {
-			url: `https://hogehoge`,
-			accounts: [`0x${privateKey}`],
+			url: `https://eth-rinkeby.alchemyapi.io/v2/${secret.alchemyApiKey}`,
+			accounts: { mnemonic: secret.mnemonic },
 		},
 		mainnet: {
-			accounts: [`0x${privateKey}`],
-			url: `https://hogehoge`,
+			url: `https://eth.alchemyapi.io/v2/${secret.alchemyApiKey}`,
+			accounts: { mnemonic: secret.mnemonic },
 		},
 	},
 	settings: {
