@@ -33,6 +33,18 @@ export const deployWith2Arg = async (
 	return contract
 }
 
+export const deployWith3Arg = async (
+	name: string,
+	arg1: number | string,
+	arg2: number | string,
+	arg3: number | string | Uint8Array
+): Promise<Contract> => {
+	const factory = await ethers.getContractFactory(name)
+	const contract = await factory.deploy(arg1, arg2, arg3)
+	await contract.deployed()
+	return contract
+}
+
 export const createMintParams = async (testData: Contract): Promise<any> => {
 	const provider = new MockProvider()
 	const owner = provider.createEmptyWallet()
