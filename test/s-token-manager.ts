@@ -94,9 +94,18 @@ describe('STokensManager', () => {
 			it('generate minted event', async () => {
 				const [sTokensManager, , lockup] = await init()
 				const mintParam = await createMintParams(testData)
-				await expect(lockup.executeMint(mintParam, {
-					gasLimit: 1200000,
-				})).to.emit(sTokensManager, 'Minted').withArgs(1, [mintParam.owner, mintParam.property, mintParam.amount, mintParam.price]);
+				await expect(
+					lockup.executeMint(mintParam, {
+						gasLimit: 1200000,
+					})
+				)
+					.to.emit(sTokensManager, 'Minted')
+					.withArgs(1, [
+						mintParam.owner,
+						mintParam.property,
+						mintParam.amount,
+						mintParam.price,
+					])
 			})
 			it('generate event', async () => {
 				const [sTokensManager, , lockup] = await init()
@@ -183,7 +192,15 @@ describe('STokensManager', () => {
 				})
 				const latestTokenId = await lockup.latestTokenId()
 				const updateParam = await createUpdateParams(testData, latestTokenId)
-				await expect(await lockup.executeUpdate(updateParam)).to.emit(sTokensManager, 'Updated').withArgs([updateParam.tokenId, updateParam.amount, updateParam.price, updateParam.cumulativeReward, updateParam.pendingReward]);
+				await expect(await lockup.executeUpdate(updateParam))
+					.to.emit(sTokensManager, 'Updated')
+					.withArgs([
+						updateParam.tokenId,
+						updateParam.amount,
+						updateParam.price,
+						updateParam.cumulativeReward,
+						updateParam.pendingReward,
+					])
 			})
 		})
 		describe('fail', () => {
