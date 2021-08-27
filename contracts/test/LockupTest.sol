@@ -6,14 +6,14 @@ import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTok
 contract LockupTest {
 	address private sTokenManager;
 	uint256 public latestTokenId;
-	ISTokensManager.StakingPosition public latestPosition;
+	ISTokensManager.StakingPosition public latestPositions;
 
 	constructor(address _sTokenManager) {
 		sTokenManager = _sTokenManager;
 	}
 
 	function executeMint(ISTokensManager.MintParams calldata _params) external {
-		(latestTokenId, latestPosition) = ISTokensManager(sTokenManager).mint(
+		(latestTokenId, latestPositions) = ISTokensManager(sTokenManager).mint(
 			_params
 		);
 	}
@@ -21,6 +21,6 @@ contract LockupTest {
 	function executeUpdate(ISTokensManager.UpdateParams calldata _params)
 		external
 	{
-		latestPosition = ISTokensManager(sTokenManager).update(_params);
+		latestPositions = ISTokensManager(sTokenManager).update(_params);
 	}
 }

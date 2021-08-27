@@ -16,6 +16,8 @@ contract STokensManager is
 	Counters.Counter private _tokenIds;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
+	event Minted(uint256 tokenId, MintParams params);
+	event Updated(UpdateParams params);
 
 	modifier onlyLockup() {
 		require(
@@ -37,7 +39,7 @@ contract STokensManager is
 		returns (string memory)
 	{
 		require(_exists(_tokenId), "not found");
-		return getTokenURI(getStoragePositionV1(_tokenId));
+		return getTokenURI(getStoragePositionsV1(_tokenId));
 	}
 
 	function mint(MintParams calldata _params)
@@ -47,20 +49,18 @@ contract STokensManager is
 		returns (uint256, StakingPosition memory)
 	{
 		_tokenIds.increment();
-		uint256 newItemId = _tokenIds.current();
-		_safeMint(_params.owner, newItemId);
+		uint256 newTokenId = _tokenIds.current();
+		_safeMint(_params.owner, newTokenId);
 		StakingPosition memory newPosition = StakingPosition(
-			_params.owner,
 			_params.property,
 			_params.amount,
 			_params.price,
-			// TODO ここ0でいいか確認
 			0,
-			// TODO ここ0でいいか確認
 			0
 		);
-		setStoragePositionV1(newItemId, newPosition);
-		return (newItemId, newPosition);
+		setStoragePositionsV1(newTokenId, newPosition);
+		emit Minted(newTokenId, _params);
+		return (newTokenId, newPosition);
 	}
 
 	function update(UpdateParams calldata _params)
@@ -70,47 +70,48 @@ contract STokensManager is
 		returns (StakingPosition memory)
 	{
 		require(_exists(_params.tokenId), "not found");
-		StakingPosition memory currentPosition = getStoragePositionV1(
+		StakingPosition memory currentPosition = getStoragePositionsV1(
 			_params.tokenId
 		);
 		currentPosition.amount = _params.amount;
 		currentPosition.price = _params.price;
 		currentPosition.cumulativeReward = _params.cumulativeReward;
 		currentPosition.pendingReward = _params.pendingReward;
-		setStoragePositionV1(_params.tokenId, currentPosition);
+		setStoragePositionsV1(_params.tokenId, currentPosition);
+		emit Updated(_params);
 		return currentPosition;
 	}
 
-	function position(uint256 _tokenId)
+	function positions(uint256 _tokenId)
 		external
 		view
 		override
 		returns (StakingPosition memory)
 	{
-		return getStoragePositionV1(_tokenId);
+		return getStoragePositionsV1(_tokenId);
 	}
 
-	function getStoragePositionV1(uint256 _tokenId)
+	function getStoragePositionsV1(uint256 _tokenId)
 		private
 		view
 		returns (StakingPosition memory)
 	{
-		bytes32 key = getStoragePositionV1Key(_tokenId);
+		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		bytes memory tmp = bytesStorage[key];
 		require(keccak256(tmp) != keccak256(bytes("")), "illegal token id");
 		return abi.decode(tmp, (StakingPosition));
 	}
 
-	function setStoragePositionV1(
+	function setStoragePositionsV1(
 		uint256 _tokenId,
 		StakingPosition memory _position
 	) private {
-		bytes32 key = getStoragePositionV1Key(_tokenId);
+		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		bytes memory tmp = abi.encode(_position);
 		bytesStorage[key] = tmp;
 	}
 
-	function getStoragePositionV1Key(uint256 _tokenId)
+	function getStoragePositionsV1Key(uint256 _tokenId)
 		private
 		pure
 		returns (bytes32)

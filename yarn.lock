@@ -42,10 +42,10 @@
   dependencies:
     "@cspotcode/source-map-consumer" "0.8.0"
 
-"@devprotocol/i-s-tokens@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@devprotocol/i-s-tokens/-/i-s-tokens-1.1.1.tgz#bb82150b1456aca8b1cb2525e000941f0709382a"
-  integrity sha512-Dhext8PwMnuT+csyYCaoFkGkkJ8Cd+QBBrLJoQBiM9ML0+oKXAujzfWXmk5uyOdpiX7iOADW+ip24vOiDMbeeg==
+"@devprotocol/i-s-tokens@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@devprotocol/i-s-tokens/-/i-s-tokens-1.2.0.tgz#b59f434cd3da57d36c3a47c430d81eb06b4c675a"
+  integrity sha512-1q56i8cOlGQdWatTG6mQEgqiizaa3XkWaBkpzB2cngtm8/BPrWz5187J5bDbffvP10os0T1VQkEqOTMmLfHUIA==
   dependencies:
     ethereum-waffle "3.4.0"
     solhint "3.3.6"
