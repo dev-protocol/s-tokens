@@ -24,8 +24,6 @@ contract STokensDescriptor {
 				_position.amount.toString(),
 				" DEV",
 				" - ",
-				// TODO historicalが亡くなった
-				// cumulativeRewardでいいのかどうか
 				_position.cumulativeReward.toString()
 			)
 		);
