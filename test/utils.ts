@@ -45,23 +45,24 @@ export const deployWith3Arg = async (
 	return contract
 }
 
-export const createMintParams = async (testData: Contract): Promise<any> => {
+export const createMintParams = (): any => {
 	const provider = new MockProvider()
 	const owner = provider.createEmptyWallet()
 	const property = provider.createEmptyWallet()
-	const params = await testData.getMintParams(
-		owner.address,
-		property.address,
-		10,
-		20
-	)
-	return params
+	return {
+		owner: owner.address,
+		property: property.address,
+		amount: 10,
+		price: 20
+	}
 }
 
-export const createUpdateParams = async (
-	testData: Contract,
+export const createUpdateParams = (
 	tokenId = 1
-): Promise<any> => {
-	const params = await testData.getUpdateParams(tokenId, 100, 200, 300, 400)
-	return params
-}
+): any => ({
+		tokenId,
+		amount: 100,
+		price: 200,
+		cumulativeReward: 300,
+		pendingReward: 400
+	})

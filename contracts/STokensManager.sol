@@ -6,8 +6,10 @@ import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {IAddressConfig} from "@devprotocol/protocol/contracts/interface/IAddressConfig.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
+import {IStakingPosition} from "./IStakingPosition.sol";
 
 contract STokensManager is
+	IStakingPosition,
 	ISTokensManager,
 	STokensDescriptor,
 	ERC721Upgradeable
@@ -16,8 +18,6 @@ contract STokensManager is
 	Counters.Counter private _tokenIds;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
-	event Minted(uint256 tokenId, MintParams params);
-	event Updated(UpdateParams params);
 
 	modifier onlyLockup() {
 		require(
@@ -42,53 +42,75 @@ contract STokensManager is
 		return getTokenURI(getStoragePositionsV1(_tokenId));
 	}
 
-	function mint(MintParams calldata _params)
-		external
-		override
-		onlyLockup
-		returns (uint256, StakingPosition memory)
-	{
+	function mint(
+		address _owner,
+		address _property,
+		uint256 _amount,
+		uint256 _price
+	) external override onlyLockup returns (uint256 tikenId_) {
 		_tokenIds.increment();
 		uint256 newTokenId = _tokenIds.current();
-		_safeMint(_params.owner, newTokenId);
+		_safeMint(_owner, newTokenId);
+		emit Minted(newTokenId, _owner, _property, _amount, _price);
 		StakingPosition memory newPosition = StakingPosition(
-			_params.property,
-			_params.amount,
-			_params.price,
+			_property,
+			_amount,
+			_price,
 			0,
 			0
 		);
 		setStoragePositionsV1(newTokenId, newPosition);
-		emit Minted(newTokenId, _params);
-		return (newTokenId, newPosition);
+		return newTokenId;
 	}
 
-	function update(UpdateParams calldata _params)
-		external
-		override
-		onlyLockup
-		returns (StakingPosition memory)
-	{
-		require(_exists(_params.tokenId), "not found");
+	function update(
+		uint256 _tikenId,
+		uint256 _amount,
+		uint256 _price,
+		uint256 _cumulativeReward,
+		uint256 _pendingReward
+	) external override onlyLockup returns (bool) {
+		require(_exists(_tikenId), "not found");
 		StakingPosition memory currentPosition = getStoragePositionsV1(
-			_params.tokenId
+			_tikenId
 		);
-		currentPosition.amount = _params.amount;
-		currentPosition.price = _params.price;
-		currentPosition.cumulativeReward = _params.cumulativeReward;
-		currentPosition.pendingReward = _params.pendingReward;
-		setStoragePositionsV1(_params.tokenId, currentPosition);
-		emit Updated(_params);
-		return currentPosition;
+		currentPosition.amount = _amount;
+		currentPosition.price = _price;
+		currentPosition.cumulativeReward = _cumulativeReward;
+		currentPosition.pendingReward = _pendingReward;
+		setStoragePositionsV1(_tikenId, currentPosition);
+		emit Updated(
+			_tikenId,
+			_amount,
+			_price,
+			_cumulativeReward,
+			_pendingReward
+		);
+		return true;
 	}
 
 	function positions(uint256 _tokenId)
 		external
 		view
 		override
-		returns (StakingPosition memory)
+		returns (
+			address property_,
+			uint256 amount_,
+			uint256 price_,
+			uint256 cumulativeReward_,
+			uint256 pendingReward_
+		)
 	{
-		return getStoragePositionsV1(_tokenId);
+		StakingPosition memory currentPosition = getStoragePositionsV1(
+			_tokenId
+		);
+		return (
+			currentPosition.property,
+			currentPosition.amount,
+			currentPosition.price,
+			currentPosition.cumulativeReward,
+			currentPosition.pendingReward
+		);
 	}
 
 	function getStoragePositionsV1(uint256 _tokenId)

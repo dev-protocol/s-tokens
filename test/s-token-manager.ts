@@ -17,11 +17,6 @@ import { checkTokenUri } from './token-uri-test'
 use(solidity)
 
 describe('STokensManager', () => {
-	let testData: Contract
-	before(async () => {
-		testData = await deploy('TestData')
-	})
-
 	const init = async (): Promise<[Contract, Contract, Contract]> => {
 		const [, user] = await ethers.getSigners()
 		const addressConfig = await deploy('AddressConfigTest')
@@ -60,8 +55,8 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('get token uri', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const filter = sTokensManager.filters.Transfer()
@@ -82,8 +77,8 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('mint nft', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const tokenId = await sTokensManager.balanceOf(mintParam.owner)
@@ -93,24 +88,24 @@ describe('STokensManager', () => {
 			})
 			it('generate minted event', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
+				const mintParam = createMintParams()
 				await expect(
-					lockup.executeMint(mintParam, {
+					lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 						gasLimit: 1200000,
 					})
 				)
 					.to.emit(sTokensManager, 'Minted')
-					.withArgs(1, [
+					.withArgs(1,
 						mintParam.owner,
 						mintParam.property,
 						mintParam.amount,
 						mintParam.price,
-					])
+					)
 			})
 			it('generate event', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const filter = sTokensManager.filters.Transfer()
@@ -124,15 +119,15 @@ describe('STokensManager', () => {
 			})
 			it('The counter will be incremented.', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const filter = sTokensManager.filters.Transfer()
 				const events = await sTokensManager.queryFilter(filter)
 				const tokenId = events[0].args!.tokenId.toString()
 				expect(tokenId).to.equal('1')
-				await lockup.executeMint(mintParam, {
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const eventsSecound = await sTokensManager.queryFilter(filter)
@@ -143,15 +138,15 @@ describe('STokensManager', () => {
 		describe('fail', () => {
 			it('If the owner runs it, an error will occur.', async () => {
 				const [sTokensManager] = await init()
-				const mintParam = await createMintParams(testData)
-				await expect(sTokensManager.mint(mintParam)).to.be.revertedWith(
+				const mintParam = createMintParams()
+				await expect(sTokensManager.mint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
 			it('If the user runs it, an error will occur.', async () => {
 				const [, sTokenManagerUser] = await init()
-				const mintParam = await createMintParams(testData)
-				await expect(sTokenManagerUser.mint(mintParam)).to.be.revertedWith(
+				const mintParam = createMintParams()
+				await expect(sTokenManagerUser.mint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
@@ -161,67 +156,67 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('update data', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const latestTokenId = await lockup.latestTokenId()
 				const beforePosition = await sTokensManager.positions(latestTokenId)
-				expect(beforePosition.property).to.equal(mintParam.property)
-				expect(beforePosition.amount).to.equal(mintParam.amount)
-				expect(beforePosition.price).to.equal(mintParam.price)
-				expect(beforePosition.cumulativeReward).to.equal(0)
-				expect(beforePosition.pendingReward).to.equal(0)
-				const updateParam = await createUpdateParams(testData, latestTokenId)
-				await lockup.executeUpdate(updateParam)
-				const afterPosition = await lockup.latestPositions()
-				expect(afterPosition.property).to.equal(mintParam.property)
-				expect(afterPosition.amount).to.equal(updateParam.amount)
-				expect(afterPosition.price).to.equal(updateParam.price)
-				expect(afterPosition.cumulativeReward).to.equal(
+				expect(beforePosition[0]).to.equal(mintParam.property)
+				expect(beforePosition[1].toNumber()).to.equal(mintParam.amount)
+				expect(beforePosition[2].toNumber()).to.equal(mintParam.price)
+				expect(beforePosition[3].toNumber()).to.equal(0)
+				expect(beforePosition[4].toNumber()).to.equal(0)
+				const updateParam = createUpdateParams(latestTokenId)
+				await lockup.executeUpdate(updateParam.tokenId, updateParam.amount, updateParam.price, updateParam.cumulativeReward, updateParam.pendingReward)
+				const afterPosition = await sTokensManager.positions(updateParam.tokenId)
+				expect(afterPosition[0]).to.equal(mintParam.property)
+				expect(afterPosition[1].toNumber()).to.equal(updateParam.amount)
+				expect(afterPosition[2].toNumber()).to.equal(updateParam.price)
+				expect(afterPosition[3].toNumber()).to.equal(
 					updateParam.cumulativeReward
 				)
-				expect(afterPosition.pendingReward).to.equal(updateParam.pendingReward)
+				expect(afterPosition[4].toNumber()).to.equal(updateParam.pendingReward)
 			})
 
 			it('generate updated event data', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const latestTokenId = await lockup.latestTokenId()
-				const updateParam = await createUpdateParams(testData, latestTokenId)
-				await expect(await lockup.executeUpdate(updateParam))
+				const updateParam = createUpdateParams(latestTokenId)
+				await expect(await lockup.executeUpdate(updateParam.tokenId, updateParam.amount, updateParam.price, updateParam.cumulativeReward, updateParam.pendingReward))
 					.to.emit(sTokensManager, 'Updated')
-					.withArgs([
+					.withArgs(
 						updateParam.tokenId,
 						updateParam.amount,
 						updateParam.price,
 						updateParam.cumulativeReward,
 						updateParam.pendingReward,
-					])
+					)
 			})
 		})
 		describe('fail', () => {
 			it('If the owner runs it, an error will occur.', async () => {
 				const [sTokensManager] = await init()
-				const updateParam = await createUpdateParams(testData)
-				await expect(sTokensManager.update(updateParam)).to.be.revertedWith(
+				const updateParam = createUpdateParams()
+				await expect(sTokensManager.update(updateParam.tokenId, updateParam.amount, updateParam.price, updateParam.cumulativeReward, updateParam.pendingReward)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
 			it('If the user runs it, an error will occur.', async () => {
 				const [, sTokenManagerUser] = await init()
-				const updateParam = await createUpdateParams(testData)
-				await expect(sTokenManagerUser.update(updateParam)).to.be.revertedWith(
+				const updateParam = createUpdateParams()
+				await expect(sTokenManagerUser.update(updateParam.tokenId, updateParam.amount, updateParam.price, updateParam.cumulativeReward, updateParam.pendingReward)).to.be.revertedWith(
 					'illegal access'
 				)
 			})
 			it('The data to be updated does not exist.', async () => {
 				const [, , lockup] = await init()
-				const updateParam = await createUpdateParams(testData, 193746)
-				await expect(lockup.executeUpdate(updateParam)).to.be.revertedWith(
+				const updateParam = createUpdateParams(193746)
+				await expect(lockup.executeUpdate(updateParam.tokenId, updateParam.amount, updateParam.price, updateParam.cumulativeReward, updateParam.pendingReward)).to.be.revertedWith(
 					'not found'
 				)
 			})
@@ -232,16 +227,16 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('get data', async () => {
 				const [sTokensManager, , lockup] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam, {
+				const mintParam = createMintParams()
+				await lockup.executeMint(mintParam.owner, mintParam.property, mintParam.amount, mintParam.price, {
 					gasLimit: 1200000,
 				})
 				const position = await sTokensManager.positions(1)
-				expect(position.property).to.equal(mintParam.property)
-				expect(position.amount).to.equal(mintParam.amount)
-				expect(position.price).to.equal(mintParam.price)
-				expect(position.cumulativeReward).to.equal(0)
-				expect(position.pendingReward).to.equal(0)
+				expect(position[0]).to.equal(mintParam.property)
+				expect(position[1].toNumber()).to.equal(mintParam.amount)
+				expect(position[2].toNumber()).to.equal(mintParam.price)
+				expect(position[3].toNumber()).to.equal(0)
+				expect(position[4].toNumber()).to.equal(0)
 			})
 		})
 		describe('fail', () => {

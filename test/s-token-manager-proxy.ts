@@ -14,11 +14,6 @@ import { checkTokenUri } from './token-uri-test'
 use(solidity)
 
 describe('STokenmanagerProxy', () => {
-	let testData: Contract
-	before(async () => {
-		testData = await deploy('TestData')
-	})
-
 	const init = async (): Promise<
 		[Contract, Contract, Contract, Contract, Contract, Contract]
 	> => {
@@ -55,11 +50,11 @@ describe('STokenmanagerProxy', () => {
 			it('upgrade logic contract', async () => {
 				const [proxy, proxyDelegate, , lockup, addressConfig, proxyAdmin] =
 					await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam)
+				const mintParams = createMintParams()
+				await lockup.executeMint(mintParams.owner, mintParams.property, mintParams.amount, mintParams.price)
 				const tokenId = await lockup.latestTokenId()
 				const uriFirst = await proxyDelegate.tokenURI(tokenId)
-				checkTokenUri(uriFirst, mintParam.property, mintParam.amount, 0)
+				checkTokenUri(uriFirst, mintParams.property, mintParams.amount, 0)
 				const sTokensManagerSecound = await deploy('STokensManagerTest')
 				await proxyAdmin.upgrade(proxy.address, sTokensManagerSecound.address)
 				const sTokenManagerTestFactory = await ethers.getContractFactory(
@@ -83,15 +78,15 @@ describe('STokenmanagerProxy', () => {
 
 			it('The data is stored in the proxy(ERC721Upgradeable)', async () => {
 				const [proxy, proxyDelegate, , lockup, , proxyAdmin] = await init()
-				const mintParam = await createMintParams(testData)
-				await lockup.executeMint(mintParam)
+				const mintParams = createMintParams()
+				await lockup.executeMint(mintParams.owner, mintParams.property, mintParams.amount, mintParams.price)
 				const tokenId = await lockup.latestTokenId()
 				const uriFirst = await proxyDelegate.tokenURI(tokenId)
-				checkTokenUri(uriFirst, mintParam.property, mintParam.amount, 0)
+				checkTokenUri(uriFirst, mintParams.property, mintParams.amount, 0)
 				const sTokensManagerSecound = await deploy('STokensManager')
 				await proxyAdmin.upgrade(proxy.address, sTokensManagerSecound.address)
 				const uriSecound = await proxyDelegate.tokenURI(tokenId)
-				checkTokenUri(uriSecound, mintParam.property, mintParam.amount, 0)
+				checkTokenUri(uriSecound, mintParams.property, mintParams.amount, 0)
 			})
 		})
 	})
