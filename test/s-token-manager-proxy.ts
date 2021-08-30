@@ -51,7 +51,12 @@ describe('STokenmanagerProxy', () => {
 				const [proxy, proxyDelegate, , lockup, addressConfig, proxyAdmin] =
 					await init()
 				const mintParams = createMintParams()
-				await lockup.executeMint(mintParams.owner, mintParams.property, mintParams.amount, mintParams.price)
+				await lockup.executeMint(
+					mintParams.owner,
+					mintParams.property,
+					mintParams.amount,
+					mintParams.price
+				)
 				const tokenId = await lockup.latestTokenId()
 				const uriFirst = await proxyDelegate.tokenURI(tokenId)
 				checkTokenUri(uriFirst, mintParams.property, mintParams.amount, 0)
@@ -79,7 +84,12 @@ describe('STokenmanagerProxy', () => {
 			it('The data is stored in the proxy(ERC721Upgradeable)', async () => {
 				const [proxy, proxyDelegate, , lockup, , proxyAdmin] = await init()
 				const mintParams = createMintParams()
-				await lockup.executeMint(mintParams.owner, mintParams.property, mintParams.amount, mintParams.price)
+				await lockup.executeMint(
+					mintParams.owner,
+					mintParams.property,
+					mintParams.amount,
+					mintParams.price
+				)
 				const tokenId = await lockup.latestTokenId()
 				const uriFirst = await proxyDelegate.tokenURI(tokenId)
 				checkTokenUri(uriFirst, mintParams.property, mintParams.amount, 0)

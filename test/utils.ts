@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'hardhat'
 import { Contract } from 'ethers'
@@ -53,16 +51,14 @@ export const createMintParams = (): any => {
 		owner: owner.address,
 		property: property.address,
 		amount: 10,
-		price: 20
+		price: 20,
 	}
 }
 
-export const createUpdateParams = (
-	tokenId = 1
-): any => ({
-		tokenId,
-		amount: 100,
-		price: 200,
-		cumulativeReward: 300,
-		pendingReward: 400
-	})
+export const createUpdateParams = (tokenId = 1): any => ({
+	tokenId,
+	amount: 100,
+	price: 200,
+	cumulativeReward: 300,
+	pendingReward: 400,
+})
