@@ -52,7 +52,7 @@ contract STokensManager is
 		uint256 newTokenId = _tokenIds.current();
 		_safeMint(_owner, newTokenId);
 		emit Minted(newTokenId, _owner, _property, _amount, _price);
-		StakingPosition memory newPosition = StakingPosition(
+		StakingPositionV1 memory newPosition = StakingPositionV1(
 			_property,
 			_amount,
 			_price,
@@ -71,7 +71,7 @@ contract STokensManager is
 		uint256 _pendingReward
 	) external override onlyLockup returns (bool) {
 		require(_exists(_tikenId), "not found");
-		StakingPosition memory currentPosition = getStoragePositionsV1(
+		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
 			_tikenId
 		);
 		currentPosition.amount = _amount;
@@ -101,7 +101,7 @@ contract STokensManager is
 			uint256 pendingReward_
 		)
 	{
-		StakingPosition memory currentPosition = getStoragePositionsV1(
+		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
 			_tokenId
 		);
 		return (
@@ -116,17 +116,17 @@ contract STokensManager is
 	function getStoragePositionsV1(uint256 _tokenId)
 		private
 		view
-		returns (StakingPosition memory)
+		returns (StakingPositionV1 memory)
 	{
 		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		bytes memory tmp = bytesStorage[key];
 		require(keccak256(tmp) != keccak256(bytes("")), "illegal token id");
-		return abi.decode(tmp, (StakingPosition));
+		return abi.decode(tmp, (StakingPositionV1));
 	}
 
 	function setStoragePositionsV1(
 		uint256 _tokenId,
-		StakingPosition memory _position
+		StakingPositionV1 memory _position
 	) private {
 		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		bytes memory tmp = abi.encode(_position);

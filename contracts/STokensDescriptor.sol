@@ -12,7 +12,7 @@ contract STokensDescriptor is IStakingPosition {
 	using AddressLib for address;
 	using Strings for uint256;
 
-	function getTokenURI(StakingPosition memory _position)
+	function getTokenURI(StakingPositionV1 memory _position)
 		internal
 		pure
 		returns (string memory)

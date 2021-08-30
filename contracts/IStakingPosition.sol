@@ -11,7 +11,7 @@ interface IStakingPosition {
 	 * @param cumulativeReward The cumulative withdrawn reward amount
 	 * @param pendingReward The pending withdrawal reward amount amount
 	 */
-	struct StakingPosition {
+	struct StakingPositionV1 {
 		address property;
 		uint256 amount;
 		uint256 price;
