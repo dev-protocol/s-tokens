@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity 0.8.4;
 
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {IAddressConfig} from "@devprotocol/protocol/contracts/interface/IAddressConfig.sol";
@@ -12,7 +12,7 @@ contract STokensManager is
 	IStakingPosition,
 	ISTokensManager,
 	STokensDescriptor,
-	ERC721Upgradeable
+	ERC721EnumerableUpgradeable
 {
 	using Counters for Counters.Counter;
 	Counters.Counter private _tokenIds;
