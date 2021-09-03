@@ -6,9 +6,25 @@ import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTok
 contract LockupTest {
 	address private sTokenManager;
 	uint256 public latestTokenId;
+	mapping(uint256 => uint256) public setValueMap;
 
 	constructor(address _sTokenManager) {
 		sTokenManager = _sTokenManager;
+	}
+
+	function calculateWithdrawableInterestAmountByPosition(uint256 _tokenId)
+		external
+		view
+		returns (uint256)
+	{
+		return setValueMap[_tokenId];
+	}
+
+	function setCalculateWithdrawableInterestAmountByPosition(
+		uint256 _tokenId,
+		uint256 _value
+	) external {
+		setValueMap[_tokenId] = _value;
 	}
 
 	function executeMint(

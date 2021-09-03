@@ -5,7 +5,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {AddressLib} from "@devprotocol/util-contracts/contracts/utils/AddressLib.sol";
 import {Base64} from "@devprotocol/util-contracts/contracts/utils/Base64.sol";
-import {IStakingPosition} from "./IStakingPosition.sol";
+import {IStakingPosition} from "./interface/IStakingPosition.sol";
 
 contract STokensDescriptor is IStakingPosition {
 	using Base64 for bytes;

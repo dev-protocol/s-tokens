@@ -3,10 +3,12 @@ pragma solidity 0.8.4;
 
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
-import {IAddressConfig} from "@devprotocol/protocol/contracts/interface/IAddressConfig.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
-import {IStakingPosition} from "./IStakingPosition.sol";
+import {IStakingPosition} from "./interface/IStakingPosition.sol";
+import {IAddressConfig} from "./interface/IAddressConfig.sol";
+import {ILockup} from "./interface/ILockup.sol";
 
 contract STokensManager is
 	IStakingPosition,
@@ -15,6 +17,7 @@ contract STokensManager is
 	ERC721EnumerableUpgradeable
 {
 	using Counters for Counters.Counter;
+	using SafeMath for uint256;
 	Counters.Counter private _tokenIds;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
@@ -111,6 +114,28 @@ contract STokensManager is
 			currentPosition.cumulativeReward,
 			currentPosition.pendingReward
 		);
+	}
+
+	function rewards(uint256 _tokenId)
+		external
+		view
+		override
+		returns (
+			uint256 entireReward_,
+			uint256 cumulativeReward_,
+			uint256 withdrawableReward_
+		)
+	{
+		address lockupAddress = IAddressConfig(config).lockup();
+		uint256 withdrawableReward = ILockup(lockupAddress)
+			.calculateWithdrawableInterestAmountByPosition(_tokenId);
+		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
+			_tokenId
+		);
+		uint256 cumulativeReward = currentPosition.cumulativeReward;
+		uint256 entireReward = cumulativeReward.add(withdrawableReward);
+
+		return (entireReward, cumulativeReward, withdrawableReward);
 	}
 
 	function getStoragePositionsV1(uint256 _tokenId)

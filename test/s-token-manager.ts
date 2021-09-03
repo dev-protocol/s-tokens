@@ -347,4 +347,61 @@ describe('STokensManager', () => {
 			})
 		})
 	})
+	describe('rewards', () => {
+		describe('success', () => {
+			it('get reward', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.setCalculateWithdrawableInterestAmountByPosition(1, 100)
+				const position = await sTokensManager.rewards(1)
+				expect(position[0].toNumber()).to.equal(100)
+				expect(position[1].toNumber()).to.equal(0)
+				expect(position[2].toNumber()).to.equal(100)
+			})
+			it('get updated reward', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const updateParam = createUpdateParams()
+				await lockup.executeUpdate(
+					updateParam.tokenId,
+					updateParam.amount,
+					updateParam.price,
+					updateParam.cumulativeReward,
+					updateParam.pendingReward
+				)
+
+				await lockup.setCalculateWithdrawableInterestAmountByPosition(1, 10000)
+				const position = await sTokensManager.rewards(1)
+				expect(position[0].toNumber()).to.equal(10300)
+				expect(position[1].toNumber()).to.equal(300)
+				expect(position[2].toNumber()).to.equal(10000)
+			})
+		})
+		describe('fail', () => {
+			it('deta is not found', async () => {
+				const [sTokensManager] = await init()
+				await expect(sTokensManager.rewards(12345)).to.be.revertedWith(
+					'illegal token id'
+				)
+			})
+		})
+	})
 })
