@@ -12,6 +12,7 @@ import {
 	createMintParams,
 	createUpdateParams,
 } from './utils'
+import { HARDHAT_ERROR } from './const'
 import { checkTokenUri } from './token-uri-test'
 
 use(solidity)
@@ -75,7 +76,9 @@ describe('STokensManager', () => {
 		describe('fail', () => {
 			it('get token symbol', async () => {
 				const [sTokensManager] = await init()
-				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith('not found')
+				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith(
+					HARDHAT_ERROR
+				)
 			})
 		})
 	})
@@ -311,7 +314,7 @@ describe('STokensManager', () => {
 						updateParam.cumulativeReward,
 						updateParam.pendingReward
 					)
-				).to.be.revertedWith('not found')
+				).to.be.revertedWith(HARDHAT_ERROR)
 			})
 		})
 	})
@@ -342,7 +345,7 @@ describe('STokensManager', () => {
 			it('deta is not found', async () => {
 				const [sTokensManager] = await init()
 				await expect(sTokensManager.positions(12345)).to.be.revertedWith(
-					'illegal token id'
+					HARDHAT_ERROR
 				)
 			})
 		})
@@ -399,7 +402,7 @@ describe('STokensManager', () => {
 			it('deta is not found', async () => {
 				const [sTokensManager] = await init()
 				await expect(sTokensManager.rewards(12345)).to.be.revertedWith(
-					'illegal token id'
+					HARDHAT_ERROR
 				)
 			})
 		})

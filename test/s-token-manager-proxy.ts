@@ -48,8 +48,7 @@ describe('STokenmanagerProxy', () => {
 	describe('upgradeTo', () => {
 		describe('success', () => {
 			it('upgrade logic contract', async () => {
-				const [proxy, proxyDelegate, , lockup, addressConfig, proxyAdmin] =
-					await init()
+				const [proxy, proxyDelegate, , lockup, , proxyAdmin] = await init()
 				const mintParams = createMintParams()
 				await lockup.executeMint(
 					mintParams.owner,
@@ -67,7 +66,7 @@ describe('STokenmanagerProxy', () => {
 				)
 				const proxyDelegateTest = sTokenManagerTestFactory.attach(proxy.address)
 				const uriSecound = await proxyDelegateTest.dummyFunc()
-				expect(uriSecound).to.equal(addressConfig.address)
+				expect(uriSecound).to.equal(10)
 			})
 
 			it('The data is stored in the proxy(STokensManager)', async () => {

@@ -21,6 +21,7 @@ contract STokensManager is
 	Counters.Counter private _tokenIds;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
+	mapping(address => uint256[]) private tokenIdsMap;
 
 	modifier onlyLockup() {
 		require(
@@ -41,7 +42,6 @@ contract STokensManager is
 		override
 		returns (string memory)
 	{
-		require(_exists(_tokenId), "not found");
 		return getTokenURI(getStoragePositionsV1(_tokenId));
 	}
 
@@ -63,6 +63,7 @@ contract STokensManager is
 			0
 		);
 		setStoragePositionsV1(newTokenId, newPosition);
+		tokenIdsMap[_property].push(newTokenId);
 		return newTokenId;
 	}
 
@@ -73,7 +74,6 @@ contract STokensManager is
 		uint256 _cumulativeReward,
 		uint256 _pendingReward
 	) external override onlyLockup returns (bool) {
-		require(_exists(_tikenId), "not found");
 		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
 			_tikenId
 		);
@@ -138,6 +138,30 @@ contract STokensManager is
 		return (entireReward, cumulativeReward, withdrawableReward);
 	}
 
+	function tokensOfProperty(address _property)
+		external
+		view
+		override
+		returns (uint256[] memory)
+	{
+		return tokenIdsMap[_property];
+	}
+
+	function tokenOfOwner(address _owner)
+		external
+		view
+		override
+		returns (uint256[] memory)
+	{
+		uint256 balance = balanceOf(_owner);
+		uint256[] memory tokenIds = new uint256[](balance);
+		for (uint256 i = 0; i < balance; i++) {
+			uint256 tokenId = tokenOfOwnerByIndex(_owner, i);
+			tokenIds[i] = tokenId;
+		}
+		return tokenIds;
+	}
+
 	function getStoragePositionsV1(uint256 _tokenId)
 		private
 		view
@@ -145,7 +169,6 @@ contract STokensManager is
 	{
 		bytes32 key = getStoragePositionsV1Key(_tokenId);
 		bytes memory tmp = bytesStorage[key];
-		require(keccak256(tmp) != keccak256(bytes("")), "illegal token id");
 		return abi.decode(tmp, (StakingPositionV1));
 	}
 
