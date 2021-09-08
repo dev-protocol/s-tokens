@@ -407,4 +407,175 @@ describe('STokensManager', () => {
 			})
 		})
 	})
+	describe('tokensOfProperty', () => {
+		describe('success', () => {
+			it('get token id', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenIds = await sTokensManager.tokensOfProperty(
+					mintParam.property
+				)
+				expect(tokenIds.length).to.equal(1)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+			})
+			it('get token by property', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const mintParam2 = createMintParams()
+				await lockup.executeMint(
+					mintParam2.owner,
+					mintParam2.property,
+					mintParam2.amount,
+					mintParam2.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenIds = await sTokensManager.tokensOfProperty(
+					mintParam.property
+				)
+				expect(tokenIds.length).to.equal(1)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+				const tokenIds2 = await sTokensManager.tokensOfProperty(
+					mintParam2.property
+				)
+				expect(tokenIds2.length).to.equal(1)
+				expect(tokenIds2[0].toNumber()).to.equal(2)
+			})
+			it('get token list', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenIds = await sTokensManager.tokensOfProperty(
+					mintParam.property
+				)
+				expect(tokenIds.length).to.equal(2)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+				expect(tokenIds[1].toNumber()).to.equal(2)
+			})
+			it('return empty array', async () => {
+				const [sTokensManager] = await init()
+				const tokenIds = await sTokensManager.tokensOfProperty(
+					constants.AddressZero
+				)
+				expect(tokenIds.length).to.equal(0)
+			})
+		})
+	})
+	describe('tokenOfOwner', () => {
+		describe('success', () => {
+			it('get token id', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenIds = await sTokensManager.tokenOfOwner(mintParam.owner)
+				expect(tokenIds.length).to.equal(1)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+			})
+			it('get token by owners', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const mintParam2 = createMintParams()
+				await lockup.executeMint(
+					mintParam2.owner,
+					mintParam2.property,
+					mintParam2.amount,
+					mintParam2.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenIds = await sTokensManager.tokenOfOwner(mintParam.owner)
+				expect(tokenIds.length).to.equal(1)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+				const tokenIds2 = await sTokensManager.tokenOfOwner(mintParam2.owner)
+				expect(tokenIds2.length).to.equal(1)
+				expect(tokenIds2[0].toNumber()).to.equal(2)
+			})
+			it('get token list', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenIds = await sTokensManager.tokenOfOwner(mintParam.owner)
+				expect(tokenIds.length).to.equal(2)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+				expect(tokenIds[1].toNumber()).to.equal(2)
+			})
+			it('return empty array', async () => {
+				const [sTokensManager] = await init()
+				const [, , , , user] = await ethers.getSigners()
+				const tokenIds = await sTokensManager.tokenOfOwner(user.address)
+				expect(tokenIds.length).to.equal(0)
+			})
+		})
+	})
 })
