@@ -153,6 +153,9 @@ contract STokensManager is
 		override
 		returns (uint256[] memory)
 	{
+		if (_owner == address(0)) {
+			return new uint256[](0);
+		}
 		uint256 balance = balanceOf(_owner);
 		uint256[] memory tokenIds = new uint256[](balance);
 		for (uint256 i = 0; i < balance; i++) {

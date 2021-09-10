@@ -572,8 +572,7 @@ describe('STokensManager', () => {
 			})
 			it('return empty array', async () => {
 				const [sTokensManager] = await init()
-				const [, , , , user] = await ethers.getSigners()
-				const tokenIds = await sTokensManager.tokenOfOwner(user.address)
+				const tokenIds = await sTokensManager.tokenOfOwner(constants.AddressZero)
 				expect(tokenIds.length).to.equal(0)
 			})
 		})
