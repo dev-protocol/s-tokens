@@ -45,7 +45,7 @@
 		"typescript": "4.4.2"
 	},
 	"dependencies": {
-		"@devprotocol/i-s-tokens": "^1.4.1",
+		"@devprotocol/i-s-tokens": "^1.5.0",
 		"@devprotocol/protocol": "^3.4.0",
 		"@devprotocol/util-contracts": "3.3.0",
 		"@openzeppelin/contracts": "4.3.1",

@@ -42,14 +42,14 @@ contract LockupTest {
 	}
 
 	function executeUpdate(
-		uint256 _tikenId,
+		uint256 _tokenId,
 		uint256 _amount,
 		uint256 _price,
 		uint256 _cumulativeReward,
 		uint256 _pendingReward
 	) external {
 		ISTokensManager(sTokensManager).update(
-			_tikenId,
+			_tokenId,
 			_amount,
 			_price,
 			_cumulativeReward,
