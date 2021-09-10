@@ -64,7 +64,9 @@ describe('STokensManagerProxy', () => {
 				const sTokensManagerTestFactory = await ethers.getContractFactory(
 					'STokensManagerTest'
 				)
-				const proxyDelegateTest = sTokensManagerTestFactory.attach(proxy.address)
+				const proxyDelegateTest = sTokensManagerTestFactory.attach(
+					proxy.address
+				)
 				const uriSecound = await proxyDelegateTest.dummyFunc()
 				expect(uriSecound).to.equal(10)
 			})
