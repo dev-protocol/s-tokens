@@ -74,7 +74,7 @@ describe('STokensManager', () => {
 			})
 		})
 		describe('fail', () => {
-			it('get token symbol', async () => {
+			it('can not get token symbol', async () => {
 				const [sTokensManager] = await init()
 				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith(
 					HARDHAT_ERROR
