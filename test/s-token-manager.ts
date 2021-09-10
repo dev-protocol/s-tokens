@@ -189,10 +189,10 @@ describe('STokensManager', () => {
 				).to.be.revertedWith('illegal access')
 			})
 			it('If the user runs it, an error will occur.', async () => {
-				const [, sTokenManagerUser] = await init()
+				const [, sTokensManagerUser] = await init()
 				const mintParam = createMintParams()
 				await expect(
-					sTokenManagerUser.mint(
+					sTokensManagerUser.mint(
 						mintParam.owner,
 						mintParam.property,
 						mintParam.amount,
@@ -291,10 +291,10 @@ describe('STokensManager', () => {
 				).to.be.revertedWith('illegal access')
 			})
 			it('If the user runs it, an error will occur.', async () => {
-				const [, sTokenManagerUser] = await init()
+				const [, sTokensManagerUser] = await init()
 				const updateParam = createUpdateParams()
 				await expect(
-					sTokenManagerUser.update(
+					sTokensManagerUser.update(
 						updateParam.tokenId,
 						updateParam.amount,
 						updateParam.price,

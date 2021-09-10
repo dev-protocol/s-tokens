@@ -13,7 +13,7 @@ import { checkTokenUri } from './token-uri-test'
 
 use(solidity)
 
-describe('STokenmanagerProxy', () => {
+describe('STokensManagerProxy', () => {
 	const init = async (): Promise<
 		[Contract, Contract, Contract, Contract, Contract, Contract]
 	> => {
@@ -29,10 +29,10 @@ describe('STokenmanagerProxy', () => {
 		)
 		const lockup = await deployWithArg('LockupTest', proxy.address)
 		await addressConfig.setLockup(lockup.address)
-		const sTokenManagerFactory = await ethers.getContractFactory(
+		const sTokensManagerFactory = await ethers.getContractFactory(
 			'STokensManager'
 		)
-		const proxyDelegate = sTokenManagerFactory.attach(proxy.address)
+		const proxyDelegate = sTokensManagerFactory.attach(proxy.address)
 		await proxyDelegate.initialize(addressConfig.address)
 
 		return [
@@ -61,10 +61,10 @@ describe('STokenmanagerProxy', () => {
 				checkTokenUri(uriFirst, mintParams.property, mintParams.amount, 0)
 				const sTokensManagerSecound = await deploy('STokensManagerTest')
 				await proxyAdmin.upgrade(proxy.address, sTokensManagerSecound.address)
-				const sTokenManagerTestFactory = await ethers.getContractFactory(
+				const sTokensManagerTestFactory = await ethers.getContractFactory(
 					'STokensManagerTest'
 				)
-				const proxyDelegateTest = sTokenManagerTestFactory.attach(proxy.address)
+				const proxyDelegateTest = sTokensManagerTestFactory.attach(proxy.address)
 				const uriSecound = await proxyDelegateTest.dummyFunc()
 				expect(uriSecound).to.equal(10)
 			})

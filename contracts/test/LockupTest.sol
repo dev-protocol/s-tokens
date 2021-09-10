@@ -4,12 +4,12 @@ pragma solidity 0.8.4;
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 
 contract LockupTest {
-	address private sTokenManager;
+	address private sTokensManager;
 	uint256 public latestTokenId;
 	mapping(uint256 => uint256) public setValueMap;
 
-	constructor(address _sTokenManager) {
-		sTokenManager = _sTokenManager;
+	constructor(address _sTokensManager) {
+		sTokensManager = _sTokensManager;
 	}
 
 	function calculateWithdrawableInterestAmountByPosition(uint256 _tokenId)
@@ -33,7 +33,7 @@ contract LockupTest {
 		uint256 _amount,
 		uint256 _price
 	) external {
-		latestTokenId = ISTokensManager(sTokenManager).mint(
+		latestTokenId = ISTokensManager(sTokensManager).mint(
 			_owner,
 			_property,
 			_amount,
@@ -48,7 +48,7 @@ contract LockupTest {
 		uint256 _cumulativeReward,
 		uint256 _pendingReward
 	) external {
-		ISTokensManager(sTokenManager).update(
+		ISTokensManager(sTokensManager).update(
 			_tikenId,
 			_amount,
 			_price,

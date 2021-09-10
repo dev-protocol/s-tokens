@@ -6,7 +6,7 @@ import { deploy, deployWithArg, deployWith3Arg } from './utils'
 
 use(solidity)
 
-describe('STokenmanagerProxyAdmin', () => {
+describe('STokensManagerProxyAdmin', () => {
 	const init = async (): Promise<[Contract, Contract, Contract]> => {
 		const addressConfig = await deploy('AddressConfigTest')
 		const sTokensManager = await deploy('STokensManager')
@@ -20,10 +20,10 @@ describe('STokenmanagerProxyAdmin', () => {
 		)
 		const lockup = await deployWithArg('LockupTest', proxy.address)
 		await addressConfig.setLockup(lockup.address)
-		const sTokenManagerFactory = await ethers.getContractFactory(
+		const sTokensManagerFactory = await ethers.getContractFactory(
 			'STokensManager'
 		)
-		const proxyDelegate = sTokenManagerFactory.attach(proxy.address)
+		const proxyDelegate = sTokensManagerFactory.attach(proxy.address)
 		await proxyDelegate.initialize(addressConfig.address)
 
 		return [proxy, sTokensManager, proxyAdmin]
