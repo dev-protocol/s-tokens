@@ -540,7 +540,9 @@ describe('STokensManager', () => {
 				const tokenIds = await sTokensManager.positionsOfOwner(mintParam.owner)
 				expect(tokenIds.length).to.equal(1)
 				expect(tokenIds[0].toNumber()).to.equal(1)
-				const tokenIds2 = await sTokensManager.positionsOfOwner(mintParam2.owner)
+				const tokenIds2 = await sTokensManager.positionsOfOwner(
+					mintParam2.owner
+				)
 				expect(tokenIds2.length).to.equal(1)
 				expect(tokenIds2[0].toNumber()).to.equal(2)
 			})
@@ -574,9 +576,9 @@ describe('STokensManager', () => {
 		describe('success', () => {
 			it('return empty array', async () => {
 				const [sTokensManager] = await init()
-				await expect(sTokensManager.positionsOfOwner(constants.AddressZero)).to.be.revertedWith(
-					'ERC721: balance query for the zero address'
-				)
+				await expect(
+					sTokensManager.positionsOfOwner(constants.AddressZero)
+				).to.be.revertedWith('ERC721: balance query for the zero address')
 			})
 		})
 	})
