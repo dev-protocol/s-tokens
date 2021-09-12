@@ -138,7 +138,7 @@ contract STokensManager is
 		return (entireReward, cumulativeReward, withdrawableReward);
 	}
 
-	function tokensOfProperty(address _property)
+	function positionsOfProperty(address _property)
 		external
 		view
 		override
@@ -147,15 +147,12 @@ contract STokensManager is
 		return tokenIdsMap[_property];
 	}
 
-	function tokenOfOwner(address _owner)
+	function positionsOfOwner(address _owner)
 		external
 		view
 		override
 		returns (uint256[] memory)
 	{
-		if (_owner == address(0)) {
-			return new uint256[](0);
-		}
 		uint256 balance = balanceOf(_owner);
 		uint256[] memory tokenIds = new uint256[](balance);
 		for (uint256 i = 0; i < balance; i++) {
