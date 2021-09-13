@@ -37,12 +37,12 @@
 		"hardhat": "2.6.0",
 		"husky": "7.0.2",
 		"mocha": "9.1.1",
-		"prettier": "2.3.2",
-		"prettier-plugin-solidity": "1.0.0-beta.17",
+		"prettier": "2.4.0",
+		"prettier-plugin-solidity": "1.0.0-beta.18",
 		"rimraf": "3.0.2",
 		"solhint": "3.3.2",
 		"ts-node": "10.2.1",
-		"typescript": "4.4.2"
+		"typescript": "4.4.3"
 	},
 	"dependencies": {
 		"@devprotocol/i-s-tokens": "^1.5.1",
