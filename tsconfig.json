@@ -9,5 +9,6 @@
 		"skipLibCheck": true,
 		"target": "es2019"
 	},
-	"include": ["**/*"]
+	"include": ["**/*"],
+	"files": ["./hardhat.config.ts"]
 }

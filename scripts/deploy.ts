@@ -1,37 +1,52 @@
-/* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
-import { ethers, providers, ContractFactory } from 'ethers'
-import { config, DotenvParseOutput } from 'dotenv'
-import { Class } from 'type-fest'
-import Provider = providers.Provider
+/* eslint-disable spaced-comment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { ethers } from 'hardhat'
 
-export type ContractDeployer = (
-	_wallet: ethers.Wallet,
-	_factory: Class<ContractFactory>,
-	_envs: DotenvParseOutput
-) => Promise<void>
+async function main() {
+	//!please check!!!!!!!!!
+	const configAddress = '0xD6D07f1c048bDF2B3d5d9B6c25eD1FC5348D0A70'
+	//!!!!!!!!!!!!!!!!!!!!!!
 
-const getDeployer = (
-	deployMnemonic?: string,
-	deployNodeUrl = 'http://127.0.0.1:8545'
-): ethers.Wallet => {
-	if (!deployMnemonic) {
-		throw new Error(
-			`Error: No DEPLOY_MNEMONIC env var set. Please add it to .<environment>.env file it and try again. See .env.example for more info.\n`
-		)
-	}
+	// STokensManager
+	const sTokensManagerFactory = await ethers.getContractFactory(
+		'STokensManager'
+	)
+	const sTokensManager = await sTokensManagerFactory.deploy()
+	await sTokensManager.deployed()
+	await sTokensManager.initialize(configAddress)
 
-	// Connect provider
-	const provider: Provider = new ethers.providers.JsonRpcProvider(deployNodeUrl)
+	// STokensManagerProxyAdmin
+	const sTokensManagerProxyAdminFactory = await ethers.getContractFactory(
+		'STokensManagerProxyAdmin'
+	)
+	const sTokensManagerProxyAdmin =
+		await sTokensManagerProxyAdminFactory.deploy()
+	await sTokensManagerProxyAdmin.deployed()
 
-	return ethers.Wallet.fromMnemonic(deployMnemonic).connect(provider)
+	const data = ethers.utils.arrayify('0x')
+
+	// STokensManagerProxy
+	const sTokensManagerProxyFactory = await ethers.getContractFactory(
+		'STokensManagerProxy'
+	)
+	const sTokensManagerProxy = await sTokensManagerProxyFactory.deploy(
+		sTokensManager.address,
+		sTokensManagerProxyAdmin.address,
+		data
+	)
+	await sTokensManagerProxy.deployed()
+
+	console.log('sTokensManager deployed to:', sTokensManager.address)
+	console.log('sTokensManagerProxy deployed to:', sTokensManagerProxy.address)
+	console.log(
+		'sTokensManagerProxyAdmin deployed to:',
+		sTokensManagerProxyAdmin.address
+	)
 }
 
-export const deploy = async (deployer: ContractDeployer): Promise<void> => {
-	const envs = config().parsed ?? {}
-	const mnemonic = envs.DEPLOY_MNEMONIC
-	const node = envs.DEPLOY_NODE_URL
-	const wallet = getDeployer(mnemonic, node)
-
-	console.log(`Deploying to network [${node ?? 'local'}]`)
-	await deployer(wallet, ContractFactory, envs)
-}
+main()
+	.then(() => process.exit(0))
+	.catch((error) => {
+		console.error(error)
+		process.exit(1)
+	})
