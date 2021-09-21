@@ -21,7 +21,7 @@
 	"devDependencies": {
 		"@nomiclabs/hardhat-ethers": "2.0.2",
 		"@nomiclabs/hardhat-waffle": "2.0.1",
-		"@types/chai": "4.2.21",
+		"@types/chai": "4.2.22",
 		"@types/dotenv": "8.2.0",
 		"@types/mocha": "9.0.0",
 		"@typescript-eslint/eslint-plugin": "4.31.2",
