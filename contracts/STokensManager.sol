@@ -2,7 +2,6 @@
 pragma solidity 0.8.4;
 
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 import {IStakingPosition} from "./interface/IStakingPosition.sol";
