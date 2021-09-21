@@ -2,7 +2,6 @@
 pragma solidity 0.8.4;
 
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
@@ -16,9 +15,7 @@ contract STokensManager is
 	STokensDescriptor,
 	ERC721EnumerableUpgradeable
 {
-	using Counters for Counters.Counter;
-	using SafeMath for uint256;
-	Counters.Counter private _tokenIds;
+	uint256 public tokenId;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
 	mapping(address => uint256[]) private tokenIdsMap;
@@ -51,10 +48,9 @@ contract STokensManager is
 		uint256 _amount,
 		uint256 _price
 	) external override onlyLockup returns (uint256 tokenId_) {
-		_tokenIds.increment();
-		uint256 newTokenId = _tokenIds.current();
-		_safeMint(_owner, newTokenId);
-		emit Minted(newTokenId, _owner, _property, _amount, _price);
+		tokenId += 1;
+		_safeMint(_owner, tokenId);
+		emit Minted(tokenId, _owner, _property, _amount, _price);
 		StakingPositionV1 memory newPosition = StakingPositionV1(
 			_property,
 			_amount,
@@ -62,9 +58,9 @@ contract STokensManager is
 			0,
 			0
 		);
-		setStoragePositionsV1(newTokenId, newPosition);
-		tokenIdsMap[_property].push(newTokenId);
-		return newTokenId;
+		setStoragePositionsV1(tokenId, newPosition);
+		tokenIdsMap[_property].push(tokenId);
+		return tokenId;
 	}
 
 	function update(
@@ -133,7 +129,7 @@ contract STokensManager is
 			_tokenId
 		);
 		uint256 cumulativeReward = currentPosition.cumulativeReward;
-		uint256 entireReward = cumulativeReward.add(withdrawableReward);
+		uint256 entireReward = cumulativeReward + withdrawableReward;
 
 		return (entireReward, cumulativeReward, withdrawableReward);
 	}
@@ -156,8 +152,8 @@ contract STokensManager is
 		uint256 balance = balanceOf(_owner);
 		uint256[] memory tokenIds = new uint256[](balance);
 		for (uint256 i = 0; i < balance; i++) {
-			uint256 tokenId = tokenOfOwnerByIndex(_owner, i);
-			tokenIds[i] = tokenId;
+			uint256 tmp = tokenOfOwnerByIndex(_owner, i);
+			tokenIds[i] = tmp;
 		}
 		return tokenIds;
 	}
