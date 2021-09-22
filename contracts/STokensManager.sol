@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity 0.8.4;
 
-import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 import {IStakingPosition} from "./interface/IStakingPosition.sol";
@@ -12,12 +12,13 @@ contract STokensManager is
 	IStakingPosition,
 	ISTokensManager,
 	STokensDescriptor,
-	ERC721EnumerableUpgradeable
+	ERC721Upgradeable
 {
-	uint256 public tokenId;
+	uint256 public tokenIdCounter;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
 	mapping(address => uint256[]) private tokenIdsMap;
+	mapping(address => uint256[]) private tokenIdsMapOfOwner;
 
 	modifier onlyLockup() {
 		require(
@@ -47,9 +48,9 @@ contract STokensManager is
 		uint256 _amount,
 		uint256 _price
 	) external override onlyLockup returns (uint256 tokenId_) {
-		tokenId += 1;
-		_safeMint(_owner, tokenId);
-		emit Minted(tokenId, _owner, _property, _amount, _price);
+		tokenIdCounter += 1;
+		_safeMint(_owner, tokenIdCounter);
+		emit Minted(tokenIdCounter, _owner, _property, _amount, _price);
 		StakingPositionV1 memory newPosition = StakingPositionV1(
 			_property,
 			_amount,
@@ -57,9 +58,9 @@ contract STokensManager is
 			0,
 			0
 		);
-		setStoragePositionsV1(tokenId, newPosition);
-		tokenIdsMap[_property].push(tokenId);
-		return tokenId;
+		setStoragePositionsV1(tokenIdCounter, newPosition);
+		tokenIdsMap[_property].push(tokenIdCounter);
+		return tokenIdCounter;
 	}
 
 	function update(
@@ -148,13 +149,7 @@ contract STokensManager is
 		override
 		returns (uint256[] memory)
 	{
-		uint256 balance = balanceOf(_owner);
-		uint256[] memory tokenIds = new uint256[](balance);
-		for (uint256 i = 0; i < balance; i++) {
-			uint256 tmp = tokenOfOwnerByIndex(_owner, i);
-			tokenIds[i] = tmp;
-		}
-		return tokenIds;
+		return tokenIdsMapOfOwner[_owner];
 	}
 
 	function getStoragePositionsV1(uint256 _tokenId)
@@ -182,5 +177,41 @@ contract STokensManager is
 		returns (bytes32)
 	{
 		return keccak256(abi.encodePacked("_positionsV1", _tokenId));
+	}
+
+	function _beforeTokenTransfer(
+		address from,
+		address to,
+		uint256 tokenId
+	) internal virtual override {
+		super._beforeTokenTransfer(from, to, tokenId);
+
+		if (from == address(0)) {
+			// mint
+			tokenIdsMapOfOwner[to].push(tokenId);
+		} else if (to == address(0)) {
+			// burn
+			revert("s tokens is not burned");
+		} else if (to != from) {
+			// transfer
+			uint256 balance = tokenIdsMapOfOwner[from].length;
+			uint256[] memory tokenIds = new uint256[](balance - 1);
+			uint256 counter = 0;
+			bool deleteFlg = false;
+			for (uint256 i = 0; i < balance; i++) {
+				uint256 _tokenId = tokenIdsMapOfOwner[from][i];
+				if (tokenId != _tokenId) {
+					tokenIds[counter] = _tokenId;
+					counter += 1;
+				} else {
+					deleteFlg = true;
+				}
+			}
+			if (deleteFlg == false) {
+				revert("illegal token id");
+			}
+			tokenIdsMapOfOwner[from] = tokenIds;
+			tokenIdsMapOfOwner[to].push(tokenId);
+		}
 	}
 }
