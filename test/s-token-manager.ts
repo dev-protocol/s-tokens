@@ -572,13 +572,133 @@ describe('STokensManager', () => {
 				expect(tokenIds[0].toNumber()).to.equal(1)
 				expect(tokenIds[1].toNumber()).to.equal(2)
 			})
-		})
-		describe('success', () => {
-			it('return empty array', async () => {
+			it.only('return empty array', async () => {
 				const [sTokensManager] = await init()
-				await expect(
-					sTokensManager.positionsOfOwner(constants.AddressZero)
-				).to.be.revertedWith('ERC721: balance query for the zero address')
+				const tokenIds = await sTokensManager.positionsOfOwner(
+					constants.AddressZero
+				)
+				expect(tokenIds.length).to.equal(0)
+			})
+			it.only('transfer token(index0)', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				const [deployer, user] = await ethers.getSigners()
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await sTokensManager.transferFrom(deployer.address, user.address, 1)
+				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
+				expect(tokenIds.length).to.equal(2)
+				expect(tokenIds[0].toNumber()).to.equal(2)
+				expect(tokenIds[1].toNumber()).to.equal(3)
+				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
+				expect(tokenIdsUser.length).to.equal(1)
+				expect(tokenIdsUser[0].toNumber()).to.equal(1)
+			})
+			it.only('transfer token(index1)', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				const [deployer, user] = await ethers.getSigners()
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await sTokensManager.transferFrom(deployer.address, user.address, 2)
+				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
+				expect(tokenIds.length).to.equal(2)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+				expect(tokenIds[1].toNumber()).to.equal(3)
+				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
+				expect(tokenIdsUser.length).to.equal(1)
+				expect(tokenIdsUser[0].toNumber()).to.equal(2)
+			})
+			it.only('transfer token(index2)', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = createMintParams()
+				const [deployer, user] = await ethers.getSigners()
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+
+				await sTokensManager.transferFrom(deployer.address, user.address, 3)
+				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
+				expect(tokenIds.length).to.equal(2)
+				expect(tokenIds[0].toNumber()).to.equal(1)
+				expect(tokenIds[1].toNumber()).to.equal(2)
+				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
+				expect(tokenIdsUser.length).to.equal(1)
+				expect(tokenIdsUser[0].toNumber()).to.equal(3)
 			})
 		})
 	})
