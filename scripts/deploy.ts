@@ -13,7 +13,6 @@ async function main() {
 	)
 	const sTokensManager = await sTokensManagerFactory.deploy()
 	await sTokensManager.deployed()
-	await sTokensManager.initialize(configAddress)
 
 	// STokensManagerProxyAdmin
 	const sTokensManagerProxyAdminFactory = await ethers.getContractFactory(
@@ -35,6 +34,10 @@ async function main() {
 		data
 	)
 	await sTokensManagerProxy.deployed()
+
+	const proxy = sTokensManagerFactory.attach(sTokensManagerProxy.address)
+	await proxy.initialize(configAddress)
+
 
 	console.log('sTokensManager deployed to:', sTokensManager.address)
 	console.log('sTokensManagerProxy deployed to:', sTokensManagerProxy.address)
