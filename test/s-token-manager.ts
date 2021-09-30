@@ -613,13 +613,8 @@ describe('STokensManager', () => {
 				await sTokensManager.transferFrom(deployer.address, user.address, 1)
 				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
 				expect(tokenIds.length).to.equal(2)
-				if (tokenIds[0] === 2) {
-					expect(tokenIds[1]).to.equal(3)
-				} else if (tokenIds[0] === 3) {
-					expect(tokenIds[1]).to.equal(2)
-				} else {
-					expect(true).to.equal(false)
-				}
+				expect(tokenIds.includes(2)).to.equal(true)
+				expect(tokenIds.includes(3)).to.equal(true)
 
 				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
 				expect(tokenIdsUser.length).to.equal(1)
@@ -659,13 +654,8 @@ describe('STokensManager', () => {
 				await sTokensManager.transferFrom(deployer.address, user.address, 2)
 				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
 				expect(tokenIds.length).to.equal(2)
-				if (tokenIds[0] === 1) {
-					expect(tokenIds[1]).to.equal(3)
-				} else if (tokenIds[0] === 3) {
-					expect(tokenIds[1]).to.equal(1)
-				} else {
-					expect(true).to.equal(false)
-				}
+				expect(tokenIds.includes(1)).to.equal(true)
+				expect(tokenIds.includes(3)).to.equal(true)
 
 				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
 				expect(tokenIdsUser.length).to.equal(1)
@@ -706,13 +696,8 @@ describe('STokensManager', () => {
 				await sTokensManager.transferFrom(deployer.address, user.address, 3)
 				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
 				expect(tokenIds.length).to.equal(2)
-				if (tokenIds[0] === 1) {
-					expect(tokenIds[1]).to.equal(2)
-				} else if (tokenIds[0] === 2) {
-					expect(tokenIds[1]).to.equal(1)
-				} else {
-					expect(true).to.equal(false)
-				}
+				expect(tokenIds.includes(1)).to.equal(true)
+				expect(tokenIds.includes(2)).to.equal(true)
 
 				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
 				expect(tokenIdsUser.length).to.equal(1)
