@@ -2,6 +2,8 @@
 pragma solidity 0.8.4;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {STokensDescriptor} from "./STokensDescriptor.sol";
 import {IStakingPosition} from "./interface/IStakingPosition.sol";
@@ -14,11 +16,14 @@ contract STokensManager is
 	STokensDescriptor,
 	ERC721Upgradeable
 {
-	uint256 public tokenIdCounter;
+	Counters.Counter private tokenIdCounter;
 	address public config;
 	mapping(bytes32 => bytes) private bytesStorage;
 	mapping(address => uint256[]) private tokenIdsMap;
-	mapping(address => uint256[]) private tokenIdsMapOfOwner;
+	mapping(address => EnumerableSet.UintSet) private tokenIdsMapOfOwner;
+
+	using Counters for Counters.Counter;
+	using EnumerableSet for EnumerableSet.UintSet;
 
 	modifier onlyLockup() {
 		require(
@@ -48,9 +53,15 @@ contract STokensManager is
 		uint256 _amount,
 		uint256 _price
 	) external override onlyLockup returns (uint256 tokenId_) {
-		tokenIdCounter += 1;
-		_safeMint(_owner, tokenIdCounter);
-		emit Minted(tokenIdCounter, _owner, _property, _amount, _price);
+		tokenIdCounter.increment();
+		_safeMint(_owner, tokenIdCounter.current());
+		emit Minted(
+			tokenIdCounter.current(),
+			_owner,
+			_property,
+			_amount,
+			_price
+		);
 		StakingPositionV1 memory newPosition = StakingPositionV1(
 			_property,
 			_amount,
@@ -58,9 +69,9 @@ contract STokensManager is
 			0,
 			0
 		);
-		setStoragePositionsV1(tokenIdCounter, newPosition);
-		tokenIdsMap[_property].push(tokenIdCounter);
-		return tokenIdCounter;
+		setStoragePositionsV1(tokenIdCounter.current(), newPosition);
+		tokenIdsMap[_property].push(tokenIdCounter.current());
+		return tokenIdCounter.current();
 	}
 
 	function update(
@@ -149,7 +160,7 @@ contract STokensManager is
 		override
 		returns (uint256[] memory)
 	{
-		return tokenIdsMapOfOwner[_owner];
+		return tokenIdsMapOfOwner[_owner].values();
 	}
 
 	function getStoragePositionsV1(uint256 _tokenId)
@@ -188,30 +199,13 @@ contract STokensManager is
 
 		if (from == address(0)) {
 			// mint
-			tokenIdsMapOfOwner[to].push(tokenId);
+			tokenIdsMapOfOwner[to].add(tokenId);
 		} else if (to == address(0)) {
 			// burn
 			revert("s tokens is not burned");
 		} else if (to != from) {
-			// transfer
-			uint256 balance = tokenIdsMapOfOwner[from].length;
-			uint256[] memory tokenIds = new uint256[](balance - 1);
-			uint256 counter = 0;
-			bool deleteFlg = false;
-			for (uint256 i = 0; i < balance; i++) {
-				uint256 _tokenId = tokenIdsMapOfOwner[from][i];
-				if (tokenId != _tokenId) {
-					tokenIds[counter] = _tokenId;
-					counter += 1;
-				} else {
-					deleteFlg = true;
-				}
-			}
-			if (deleteFlg == false) {
-				revert("illegal token id");
-			}
-			tokenIdsMapOfOwner[from] = tokenIds;
-			tokenIdsMapOfOwner[to].push(tokenId);
+			tokenIdsMapOfOwner[from].remove(tokenId);
+			tokenIdsMapOfOwner[to].add(tokenId);
 		}
 	}
 }
