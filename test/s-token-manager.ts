@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable new-cap */
 import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
-import { Contract, constants } from 'ethers'
+import { Contract, constants,BigNumber } from 'ethers'
 import { solidity } from 'ethereum-waffle'
 import {
 	deploy,
@@ -613,8 +615,9 @@ describe('STokensManager', () => {
 				await sTokensManager.transferFrom(deployer.address, user.address, 1)
 				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
 				expect(tokenIds.length).to.equal(2)
-				expect(tokenIds.includes(2)).to.equal(true)
-				expect(tokenIds.includes(3)).to.equal(true)
+				const tmpIds = tokenIds.map((value: BigNumber) => value.toNumber())
+				expect(tmpIds.includes(2)).to.equal(true)
+				expect(tmpIds.includes(3)).to.equal(true)
 
 				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
 				expect(tokenIdsUser.length).to.equal(1)
@@ -654,8 +657,9 @@ describe('STokensManager', () => {
 				await sTokensManager.transferFrom(deployer.address, user.address, 2)
 				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
 				expect(tokenIds.length).to.equal(2)
-				expect(tokenIds.includes(1)).to.equal(true)
-				expect(tokenIds.includes(3)).to.equal(true)
+				const tmpIds = tokenIds.map((value: BigNumber) => value.toNumber())
+				expect(tmpIds.includes(1)).to.equal(true)
+				expect(tmpIds.includes(3)).to.equal(true)
 
 				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
 				expect(tokenIdsUser.length).to.equal(1)
@@ -696,8 +700,9 @@ describe('STokensManager', () => {
 				await sTokensManager.transferFrom(deployer.address, user.address, 3)
 				const tokenIds = await sTokensManager.positionsOfOwner(deployer.address)
 				expect(tokenIds.length).to.equal(2)
-				expect(tokenIds.includes(1)).to.equal(true)
-				expect(tokenIds.includes(2)).to.equal(true)
+				const tmpIds = tokenIds.map((value: BigNumber) => value.toNumber())
+				expect(tmpIds.includes(1)).to.equal(true)
+				expect(tmpIds.includes(2)).to.equal(true)
 
 				const tokenIdsUser = await sTokensManager.positionsOfOwner(user.address)
 				expect(tokenIdsUser.length).to.equal(1)
