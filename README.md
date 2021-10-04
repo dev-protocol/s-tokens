@@ -1,11 +1,7 @@
-# template-repos-ts-sol
+## How to verify the code on Etherscan
 
-Template repository for using TypeScript and Solidity
+For example: STokensManagerProxy
 
-# Usage
-
-Create a repository using this template; just runs following command.
-
-```bash
-yarn
+```
+npx hardhat verify --contract contracts/STokensManagerProxy.sol:STokensManagerProxy --network mainnet <Deployed address> <Deployed parameters <Logic contract address> <Admin address> 0x>
 ```

@@ -1,7 +1,9 @@
 import '@nomiclabs/hardhat-waffle'
+import '@nomiclabs/hardhat-etherscan'
 
-const alchemyApiKey = ''
+const alchemyApiKey = 'og4nnWIt39kz8KxzEN46npdmvtFiWkdr'
 const mnemonic = ''
+const etherscanApiKey = '8VQZGVMNHTAJEM531Z7SUYZK13MCZIIEY7'
 
 module.exports = {
 	mocha: {
@@ -23,5 +25,8 @@ module.exports = {
 			enabled: true,
 			runs: 1000,
 		},
+	},
+	etherscan: {
+		apiKey: etherscanApiKey,
 	},
 }
