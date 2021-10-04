@@ -6,7 +6,7 @@
 /* eslint-disable new-cap */
 import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
-import { Contract, constants,BigNumber } from 'ethers'
+import { Contract, constants, BigNumber } from 'ethers'
 import { solidity } from 'ethereum-waffle'
 import {
 	deploy,

@@ -3,9 +3,7 @@
 import { ethers } from 'hardhat'
 
 async function main() {
-	//!please check!!!!!!!!!
-	const configAddress = '0xD6D07f1c048bDF2B3d5d9B6c25eD1FC5348D0A70'
-	//!!!!!!!!!!!!!!!!!!!!!!
+	const configAddress = '0x1D415aa39D647834786EB9B5a333A50e9935b796'
 
 	// STokensManager
 	const sTokensManagerFactory = await ethers.getContractFactory(
@@ -37,7 +35,6 @@ async function main() {
 
 	const proxy = sTokensManagerFactory.attach(sTokensManagerProxy.address)
 	await proxy.initialize(configAddress)
-
 
 	console.log('sTokensManager deployed to:', sTokensManager.address)
 	console.log('sTokensManagerProxy deployed to:', sTokensManagerProxy.address)
