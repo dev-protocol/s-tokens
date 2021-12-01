@@ -17,7 +17,14 @@
 		"prettier"
 	],
 	"rules": {
-		"@typescript-eslint/prefer-readonly-parameter-types": "warn"
+		"@typescript-eslint/prefer-readonly-parameter-types": "warn",
+		"@typescript-eslint/naming-convention": [
+			"error",
+			{
+				"selector": "variable",
+				"format": ["camelCase", "UPPER_CASE"]
+			}
+		]
 	},
 	"overrides": [
 		{
