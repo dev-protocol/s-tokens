@@ -32,7 +32,7 @@
 		"eslint": "8.3.0",
 		"eslint-config-prettier": "8.3.0",
 		"eslint-config-xo": "0.39.0",
-		"eslint-config-xo-typescript": "0.44.0",
+		"eslint-config-xo-typescript": "0.47.1",
 		"ethereum-waffle": "3.4.0",
 		"ethers": "5.5.1",
 		"hardhat": "2.7.0",
