@@ -44,14 +44,14 @@
 		"rimraf": "3.0.2",
 		"solhint": "3.3.6",
 		"ts-node": "10.4.0",
-		"typescript": "4.5.2"
+		"typescript": "4.5.2",
+		"fast-deep-equal": "3.1.3"
 	},
 	"dependencies": {
-		"@devprotocol/i-s-tokens": "^1.5.1",
-		"@devprotocol/protocol": "^3.4.0",
+		"@devprotocol/i-s-tokens": "1.5.1",
+		"@devprotocol/protocol": "3.4.0",
 		"@devprotocol/util-contracts": "3.3.0",
-		"@openzeppelin/contracts": "4.4.0",
-		"@openzeppelin/contracts-upgradeable": "^4.3.0",
-		"fast-deep-equal": "^3.1.3"
+		"@openzeppelin/contracts": "4.2.0",
+		"@openzeppelin/contracts-upgradeable": "4.2.0"
 	}
 }
