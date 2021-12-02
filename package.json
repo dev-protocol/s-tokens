@@ -51,7 +51,7 @@
 		"@devprotocol/i-s-tokens": "1.5.1",
 		"@devprotocol/protocol": "3.4.0",
 		"@devprotocol/util-contracts": "3.3.0",
-		"@openzeppelin/contracts": "4.2.0",
-		"@openzeppelin/contracts-upgradeable": "4.2.0"
+		"@openzeppelin/contracts": "4.3.2",
+		"@openzeppelin/contracts-upgradeable": "4.3.2"
 	}
 }

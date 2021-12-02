@@ -7,7 +7,7 @@
 				"@openzeppelin/contracts",
 				"@openzeppelin/contracts-upgradeable"
 			],
-			"allowedVersions": "4.2.0"
+			"allowedVersions": "4.3.2"
 		},
 		{
 			"packageNames": ["@devprotocol/util-contracts"],
