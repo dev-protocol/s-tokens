@@ -14,8 +14,8 @@ contract STokensDescriptor is ISTokenManagerDescriptor, ISTokenManagerStruct {
 
 	function getTokenURI(StakingPositionV1 memory _position)
 		external
-		override
 		pure
+		override
 		returns (string memory)
 	{
 		string memory name = string(

@@ -62,9 +62,15 @@ contract STokensManager is
 		bytes memory tmp = bytesStorage[key];
 		if (tmp.length == 0) {
 			StakingPositionV1 memory positons = getStoragePositionsV1(_tokenId);
-			return ISTokenManagerDescriptor(descriptorAddress).getTokenURI(positons);
+			return
+				ISTokenManagerDescriptor(descriptorAddress).getTokenURI(
+					positons
+				);
 		}
-		DescriptorsV1 memory currentDescriptor = abi.decode(tmp, (DescriptorsV1));
+		DescriptorsV1 memory currentDescriptor = abi.decode(
+			tmp,
+			(DescriptorsV1)
+		);
 		return currentDescriptor.descriptor;
 	}
 
@@ -127,13 +133,20 @@ contract STokensManager is
 	{
 		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
 		bytes memory tmp = bytesStorage[key];
-		DescriptorsV1 memory descriptor = DescriptorsV1(false, address(0), _data);
+		DescriptorsV1 memory descriptor = DescriptorsV1(
+			false,
+			address(0),
+			_data
+		);
 		emit SetTokenUri(_tokenId, _msgSender(), _data);
 		if (tmp.length == 0) {
 			setStorageDescriptorsV1(_tokenId, descriptor);
 			return;
 		}
-		DescriptorsV1 memory currentDescriptor = abi.decode(tmp, (DescriptorsV1));
+		DescriptorsV1 memory currentDescriptor = abi.decode(
+			tmp,
+			(DescriptorsV1)
+		);
 		require(currentDescriptor.isFreezed == false, "freezed");
 		setStorageDescriptorsV1(_tokenId, descriptor);
 	}
@@ -143,7 +156,9 @@ contract STokensManager is
 		override
 		onlyAuthor(_tokenId)
 	{
-		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(_tokenId);
+		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(
+			_tokenId
+		);
 		require(currentDescriptor.isFreezed == false, "already freezed");
 		currentDescriptor.isFreezed = true;
 		currentDescriptor.freezingUser = _msgSender();
@@ -152,7 +167,9 @@ contract STokensManager is
 	}
 
 	function meltTokenURI(uint256 _tokenId) external override {
-		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(_tokenId);
+		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(
+			_tokenId
+		);
 		require(currentDescriptor.isFreezed == true, "not freezed");
 		require(
 			currentDescriptor.freezingUser == _msgSender(),
@@ -192,10 +209,20 @@ contract STokensManager is
 		external
 		view
 		override
-		returns (bool, address, string memory)
+		returns (
+			bool,
+			address,
+			string memory
+		)
 	{
-		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(_tokenId);
-		return (currentDescriptor.isFreezed, currentDescriptor.freezingUser, currentDescriptor.descriptor);
+		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(
+			_tokenId
+		);
+		return (
+			currentDescriptor.isFreezed,
+			currentDescriptor.freezingUser,
+			currentDescriptor.descriptor
+		);
 	}
 
 	function rewards(uint256 _tokenId)
