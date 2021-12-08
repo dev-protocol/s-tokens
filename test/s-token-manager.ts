@@ -13,6 +13,7 @@ import {
 	deployWithArg,
 	createMintParams,
 	createUpdateParams,
+	deployWith3Arg,
 } from './utils'
 import { HARDHAT_ERROR } from './const'
 import { checkTokenUri } from './token-uri-test'
@@ -24,11 +25,23 @@ describe('STokensManager', () => {
 		const [, user] = await ethers.getSigners()
 		const addressConfig = await deploy('AddressConfigTest')
 		const sTokensManager = await deploy('STokensManager')
-		await sTokensManager.initialize(addressConfig.address)
+		const data = ethers.utils.arrayify('0x')
+		const proxyAdmin = await deploy('STokensManagerProxyAdmin')
+		const proxy = await deployWith3Arg(
+			'STokensManagerProxy',
+			sTokensManager.address,
+			proxyAdmin.address,
+			data
+		)
+		const sTokensManagerFactory = await ethers.getContractFactory(
+			'STokensManager'
+		)
+		const proxyDelegate = sTokensManagerFactory.attach(proxy.address)
+		await proxyDelegate.initialize(addressConfig.address)
 		const lockup = await deployWithArg('LockupTest', sTokensManager.address)
 		await addressConfig.setLockup(lockup.address)
-		const sTokensManagerUser = sTokensManager.connect(user)
-		return [sTokensManager, sTokensManagerUser, lockup]
+		const sTokensManagerUser = proxyDelegate.connect(user)
+		return [proxyDelegate, sTokensManagerUser, lockup]
 	}
 
 	describe('initialize', () => {
