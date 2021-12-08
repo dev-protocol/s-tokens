@@ -5,15 +5,15 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
-import {STokensDescriptor} from "./STokensDescriptor.sol";
-import {IStakingPosition} from "./interface/IStakingPosition.sol";
+import {ISTokenManagerStruct} from "./interface/ISTokenManagerStruct.sol";
+import {ISTokenManagerDescriptor} from "./interface/ISTokenManagerDescriptor.sol";
 import {IAddressConfig} from "./interface/IAddressConfig.sol";
 import {ILockup} from "./interface/ILockup.sol";
+import {IProperty} from "./interface/IProperty.sol";
 
 contract STokensManager is
-	IStakingPosition,
+	ISTokenManagerStruct,
 	ISTokensManager,
-	STokensDescriptor,
 	ERC721Upgradeable
 {
 	Counters.Counter private tokenIdCounter;
@@ -21,9 +21,19 @@ contract STokensManager is
 	mapping(bytes32 => bytes) private bytesStorage;
 	mapping(address => uint256[]) private tokenIdsMap;
 	mapping(address => EnumerableSet.UintSet) private tokenIdsMapOfOwner;
+	address public descriptorAddress;
 
 	using Counters for Counters.Counter;
 	using EnumerableSet for EnumerableSet.UintSet;
+
+	modifier onlyAuthor(uint256 _tokenId) {
+		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
+			_tokenId
+		);
+		address author = IProperty(currentPosition.property).author();
+		require(author == _msgSender(), "illegal access");
+		_;
+	}
 
 	modifier onlyLockup() {
 		require(
@@ -38,13 +48,24 @@ contract STokensManager is
 		config = _config;
 	}
 
+	function setDescriptor(address _descriptor) external override {
+		descriptorAddress = _descriptor;
+	}
+
 	function tokenURI(uint256 _tokenId)
 		public
 		view
 		override
 		returns (string memory)
 	{
-		return getTokenURI(getStoragePositionsV1(_tokenId));
+		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
+		bytes memory tmp = bytesStorage[key];
+		if (tmp.length == 0) {
+			StakingPositionV1 memory positons = getStoragePositionsV1(_tokenId);
+			return ISTokenManagerDescriptor(descriptorAddress).getTokenURI(positons);
+		}
+		DescriptorsV1 memory currentDescriptor = abi.decode(tmp, (DescriptorsV1));
+		return currentDescriptor.descriptor;
 	}
 
 	function mint(
@@ -99,6 +120,50 @@ contract STokensManager is
 		return true;
 	}
 
+	function setTokenURIImage(uint256 _tokenId, string memory _data)
+		external
+		override
+		onlyAuthor(_tokenId)
+	{
+		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
+		bytes memory tmp = bytesStorage[key];
+		DescriptorsV1 memory descriptor = DescriptorsV1(false, address(0), _data);
+		emit SetTokenUri(_tokenId, _msgSender(), _data);
+		if (tmp.length == 0) {
+			setStorageDescriptorsV1(_tokenId, descriptor);
+			return;
+		}
+		DescriptorsV1 memory currentDescriptor = abi.decode(tmp, (DescriptorsV1));
+		require(currentDescriptor.isFreezed == false, "freezed");
+		setStorageDescriptorsV1(_tokenId, descriptor);
+	}
+
+	function freezeTokenURI(uint256 _tokenId)
+		external
+		override
+		onlyAuthor(_tokenId)
+	{
+		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(_tokenId);
+		require(currentDescriptor.isFreezed == false, "already freezed");
+		currentDescriptor.isFreezed = true;
+		currentDescriptor.freezingUser = _msgSender();
+		setStorageDescriptorsV1(_tokenId, currentDescriptor);
+		emit Freezed(_tokenId, _msgSender());
+	}
+
+	function meltTokenURI(uint256 _tokenId) external override {
+		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(_tokenId);
+		require(currentDescriptor.isFreezed == true, "not freezed");
+		require(
+			currentDescriptor.freezingUser == _msgSender(),
+			"illegal access"
+		);
+		currentDescriptor.isFreezed = false;
+		currentDescriptor.freezingUser = address(0);
+		setStorageDescriptorsV1(_tokenId, currentDescriptor);
+		emit Melted(_tokenId, _msgSender());
+	}
+
 	function positions(uint256 _tokenId)
 		external
 		view
@@ -121,6 +186,16 @@ contract STokensManager is
 			currentPosition.cumulativeReward,
 			currentPosition.pendingReward
 		);
+	}
+
+	function descriptors(uint256 _tokenId)
+		external
+		view
+		override
+		returns (bool, address, string memory)
+	{
+		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(_tokenId);
+		return (currentDescriptor.isFreezed, currentDescriptor.freezingUser, currentDescriptor.descriptor);
 	}
 
 	function rewards(uint256 _tokenId)
@@ -173,6 +248,16 @@ contract STokensManager is
 		return abi.decode(tmp, (StakingPositionV1));
 	}
 
+	function getStorageDescriptorsV1(uint256 _tokenId)
+		private
+		view
+		returns (DescriptorsV1 memory)
+	{
+		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
+		bytes memory tmp = bytesStorage[key];
+		return abi.decode(tmp, (DescriptorsV1));
+	}
+
 	function setStoragePositionsV1(
 		uint256 _tokenId,
 		StakingPositionV1 memory _position
@@ -182,12 +267,29 @@ contract STokensManager is
 		bytesStorage[key] = tmp;
 	}
 
+	function setStorageDescriptorsV1(
+		uint256 _tokenId,
+		DescriptorsV1 memory _descriptor
+	) private {
+		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
+		bytes memory tmp = abi.encode(_descriptor);
+		bytesStorage[key] = tmp;
+	}
+
 	function getStoragePositionsV1Key(uint256 _tokenId)
 		private
 		pure
 		returns (bytes32)
 	{
 		return keccak256(abi.encodePacked("_positionsV1", _tokenId));
+	}
+
+	function getStorageDescriptorsV1Key(uint256 _tokenId)
+		private
+		pure
+		returns (bytes32)
+	{
+		return keccak256(abi.encodePacked("_descriptorsV1", _tokenId));
 	}
 
 	function _beforeTokenTransfer(

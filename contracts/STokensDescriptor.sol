@@ -4,15 +4,17 @@ pragma solidity 0.8.4;
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {AddressLib} from "@devprotocol/util-contracts/contracts/utils/AddressLib.sol";
 import {Base64} from "@devprotocol/util-contracts/contracts/utils/Base64.sol";
-import {IStakingPosition} from "./interface/IStakingPosition.sol";
+import {ISTokenManagerDescriptor} from "./interface/ISTokenManagerDescriptor.sol";
+import {ISTokenManagerStruct} from "./interface/ISTokenManagerStruct.sol";
 
-contract STokensDescriptor is IStakingPosition {
+contract STokensDescriptor is ISTokenManagerDescriptor, ISTokenManagerStruct {
 	using Base64 for bytes;
 	using AddressLib for address;
 	using Strings for uint256;
 
 	function getTokenURI(StakingPositionV1 memory _position)
-		internal
+		external
+		override
 		pure
 		returns (string memory)
 	{

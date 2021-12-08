@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity 0.8.4;
 
-interface IStakingPosition {
+interface ISTokenManagerStruct {
 	/*
 	 * @dev Struct to declares a staking position.
 	 * @param owner The address of the owner of the new staking position
@@ -17,5 +17,17 @@ interface IStakingPosition {
 		uint256 price;
 		uint256 cumulativeReward;
 		uint256 pendingReward;
+	}
+
+	/*
+	 * @dev Struct to customize token uri.
+	 * @param isFreezed Whether the descriptor can be changed or not
+	 * @param freezingUser Authors who have done the Freeze process
+	 * @param descriptor File Contents
+	 */
+	struct DescriptorsV1 {
+		bool isFreezed;
+		address freezingUser;
+		string descriptor;
 	}
 }
