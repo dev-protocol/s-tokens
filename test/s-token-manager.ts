@@ -64,10 +64,20 @@ describe('STokensManager', () => {
 		})
 	})
 	describe('descriptorAddress', () => {
-		it('get descriptor address', async () => {
-			const [sTokensManager, , , sTokensDescriptor] = await init()
-			const descriptorAddress = await sTokensManager.descriptorAddress()
-			expect(descriptorAddress).to.equal(sTokensDescriptor.address)
+		describe('success', () => {
+			it('get descriptor address', async () => {
+				const [sTokensManager, , , sTokensDescriptor] = await init()
+				const descriptorAddress = await sTokensManager.descriptorAddress()
+				expect(descriptorAddress).to.equal(sTokensDescriptor.address)
+			})
+		})
+		describe('fail', () => {
+			it('can not reset', async () => {
+				const [sTokensManager] = await init()
+				await expect(sTokensManager.setDescriptor(constants.AddressZero)).to.be.revertedWith(
+					'already set'
+				)
+			})
 		})
 	})
 	describe('symbol', () => {

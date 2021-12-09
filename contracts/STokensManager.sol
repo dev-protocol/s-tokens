@@ -49,6 +49,7 @@ contract STokensManager is
 	}
 
 	function setDescriptor(address _descriptor) external override {
+		require(descriptorAddress == address(0), "already set");
 		descriptorAddress = _descriptor;
 	}
 
