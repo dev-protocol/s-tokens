@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Contract } from 'ethers'
 import { MockProvider } from 'ethereum-waffle'
 
@@ -43,10 +44,11 @@ export const deployWith3Arg = async (
 	return contract
 }
 
-export const createMintParams = (): any => {
+export const createMintParams = async (): Promise<any> => {
 	const provider = new MockProvider()
 	const owner = provider.createEmptyWallet()
-	const property = provider.createEmptyWallet()
+	const signers = await getSigners()
+	const property = await deployWithArg('PropertyTest', signers.user.address)
 	return {
 		owner: owner.address,
 		property: property.address,
@@ -62,3 +64,13 @@ export const createUpdateParams = (tokenId = 1): any => ({
 	cumulativeReward: 300,
 	pendingReward: 400,
 })
+
+type Signers = {
+	deployer: SignerWithAddress
+	user: SignerWithAddress
+}
+
+export const getSigners = async (): Promise<Signers> => {
+	const [deployer, user] = await ethers.getSigners()
+	return { deployer, user }
+}
