@@ -31,11 +31,11 @@ async function main() {
 	const admin = sTokensManagerProxyAdminFactory.attach(adminAddress)
 
 	await admin.upgrade(proxyAddress, sTokensManager.address)
-	console.log('upgrade to:', admin.getProxyImplementation(proxyAddress))
+	console.log('upgrade to:', await admin.getProxyImplementation(proxyAddress))
 
 	const proxy = sTokensManagerFactory.attach(proxyAddress)
 	await proxy.setDescriptor(sTokensDescriptor.address)
-	console.log('set descripter address:', proxy.descriptorAddress())
+	console.log('set descripter address:', await proxy.descriptorAddress())
 }
 
 main()
