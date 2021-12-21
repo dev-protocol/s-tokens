@@ -21,7 +21,9 @@ contract STokensManager is
 	mapping(bytes32 => bytes) private bytesStorage;
 	mapping(address => uint256[]) private tokenIdsMap;
 	mapping(address => EnumerableSet.UintSet) private tokenIdsMapOfOwner;
-	address public descriptorAddress;
+	mapping(uint256 => string) private tokenUriImage;
+	mapping(uint256 => bool) public override isFreezed;
+	address public descriptor;
 
 	using Counters for Counters.Counter;
 	using EnumerableSet for EnumerableSet.UintSet;
@@ -43,14 +45,14 @@ contract STokensManager is
 		_;
 	}
 
-	function initialize(address _config) external override initializer {
+	function initialize(address _config) external initializer {
 		__ERC721_init("Dev Protocol sTokens V1", "DEV-STOKENS-V1");
 		config = _config;
 	}
 
-	function setDescriptor(address _descriptor) external override {
-		require(descriptorAddress == address(0), "already set");
-		descriptorAddress = _descriptor;
+	function setDescriptor(address _descriptor) external {
+		require(descriptor == address(0), "already set");
+		descriptor = _descriptor;
 	}
 
 	function tokenURI(uint256 _tokenId)
@@ -59,20 +61,12 @@ contract STokensManager is
 		override
 		returns (string memory)
 	{
-		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
-		bytes memory tmp = bytesStorage[key];
-		if (tmp.length == 0) {
+		string memory tokeUri = tokenUriImage[_tokenId];
+		if (bytes(tokeUri).length == 0) {
 			StakingPositionV1 memory positons = getStoragePositionsV1(_tokenId);
-			return
-				ISTokenManagerDescriptor(descriptorAddress).getTokenURI(
-					positons
-				);
+			return ISTokenManagerDescriptor(descriptor).getTokenURI(positons);
 		}
-		DescriptorsV1 memory currentDescriptor = abi.decode(
-			tmp,
-			(DescriptorsV1)
-		);
-		return currentDescriptor.descriptor;
+		return tokeUri;
 	}
 
 	function mint(
@@ -132,24 +126,8 @@ contract STokensManager is
 		override
 		onlyAuthor(_tokenId)
 	{
-		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
-		bytes memory tmp = bytesStorage[key];
-		DescriptorsV1 memory descriptor = DescriptorsV1(
-			false,
-			address(0),
-			_data
-		);
-		emit SetTokenUri(_tokenId, _msgSender(), _data);
-		if (tmp.length == 0) {
-			setStorageDescriptorsV1(_tokenId, descriptor);
-			return;
-		}
-		DescriptorsV1 memory currentDescriptor = abi.decode(
-			tmp,
-			(DescriptorsV1)
-		);
-		require(currentDescriptor.isFreezed == false, "freezed");
-		setStorageDescriptorsV1(_tokenId, descriptor);
+		require(isFreezed[_tokenId] == false, "freezed");
+		tokenUriImage[_tokenId] = _data;
 	}
 
 	function freezeTokenURI(uint256 _tokenId)
@@ -157,13 +135,10 @@ contract STokensManager is
 		override
 		onlyAuthor(_tokenId)
 	{
-		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(
-			_tokenId
-		);
-		require(currentDescriptor.isFreezed == false, "already freezed");
-		currentDescriptor.isFreezed = true;
-		currentDescriptor.freezingUser = _msgSender();
-		setStorageDescriptorsV1(_tokenId, currentDescriptor);
+		require(isFreezed[_tokenId] == false, "already freezed");
+		string memory tokeUri = tokenUriImage[_tokenId];
+		require(bytes(tokeUri).length != 0, "no data");
+		isFreezed[_tokenId] = true;
 		emit Freezed(_tokenId, _msgSender());
 	}
 
@@ -188,26 +163,6 @@ contract STokensManager is
 			currentPosition.price,
 			currentPosition.cumulativeReward,
 			currentPosition.pendingReward
-		);
-	}
-
-	function descriptors(uint256 _tokenId)
-		external
-		view
-		override
-		returns (
-			bool,
-			address,
-			string memory
-		)
-	{
-		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(
-			_tokenId
-		);
-		return (
-			currentDescriptor.isFreezed,
-			currentDescriptor.freezingUser,
-			currentDescriptor.descriptor
 		);
 	}
 
@@ -261,16 +216,6 @@ contract STokensManager is
 		return abi.decode(tmp, (StakingPositionV1));
 	}
 
-	function getStorageDescriptorsV1(uint256 _tokenId)
-		private
-		view
-		returns (DescriptorsV1 memory)
-	{
-		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
-		bytes memory tmp = bytesStorage[key];
-		return abi.decode(tmp, (DescriptorsV1));
-	}
-
 	function setStoragePositionsV1(
 		uint256 _tokenId,
 		StakingPositionV1 memory _position
@@ -280,29 +225,12 @@ contract STokensManager is
 		bytesStorage[key] = tmp;
 	}
 
-	function setStorageDescriptorsV1(
-		uint256 _tokenId,
-		DescriptorsV1 memory _descriptor
-	) private {
-		bytes32 key = getStorageDescriptorsV1Key(_tokenId);
-		bytes memory tmp = abi.encode(_descriptor);
-		bytesStorage[key] = tmp;
-	}
-
 	function getStoragePositionsV1Key(uint256 _tokenId)
 		private
 		pure
 		returns (bytes32)
 	{
 		return keccak256(abi.encodePacked("_positionsV1", _tokenId));
-	}
-
-	function getStorageDescriptorsV1Key(uint256 _tokenId)
-		private
-		pure
-		returns (bytes32)
-	{
-		return keccak256(abi.encodePacked("_descriptorsV1", _tokenId));
 	}
 
 	function _beforeTokenTransfer(

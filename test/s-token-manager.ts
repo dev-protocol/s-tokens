@@ -63,20 +63,20 @@ describe('STokensManager', () => {
 			expect(name).to.equal('Dev Protocol sTokens V1')
 		})
 	})
-	describe('descriptorAddress', () => {
+	describe('descriptor', () => {
 		describe('success', () => {
 			it('get descriptor address', async () => {
 				const [sTokensManager, , , sTokensDescriptor] = await init()
-				const descriptorAddress = await sTokensManager.descriptorAddress()
+				const descriptorAddress = await sTokensManager.descriptor()
 				expect(descriptorAddress).to.equal(sTokensDescriptor.address)
 			})
 		})
 		describe('fail', () => {
 			it('can not reset', async () => {
 				const [sTokensManager] = await init()
-				await expect(sTokensManager.setDescriptor(constants.AddressZero)).to.be.revertedWith(
-					'already set'
-				)
+				await expect(
+					sTokensManager.setDescriptor(constants.AddressZero)
+				).to.be.revertedWith('already set')
 			})
 		})
 	})
@@ -388,23 +388,6 @@ describe('STokensManager', () => {
 				const tokenUri = await sTokensManager.tokenURI(1)
 				expect(tokenUri).to.equal('http://dummy')
 			})
-			it('generate event', async () => {
-				const [, sTokensManagerUser, lockup] = await init()
-				const mintParam = await createMintParams()
-				await lockup.executeMint(
-					mintParam.owner,
-					mintParam.property,
-					mintParam.amount,
-					mintParam.price,
-					{
-						gasLimit: 1200000,
-					}
-				)
-				const signers = await getSigners()
-				await expect(sTokensManagerUser.setTokenURIImage(1, 'http://dummy'))
-					.to.emit(sTokensManagerUser, 'SetTokenUri')
-					.withArgs(1, signers.user.address, 'http://dummy')
-			})
 			it('get overwritten data', async () => {
 				const [, sTokensManagerUser, lockup] = await init()
 				const mintParam = await createMintParams()
@@ -476,7 +459,11 @@ describe('STokensManager', () => {
 					}
 				)
 				await sTokensManagerUser.setTokenURIImage(1, 'http://dummy')
+				let isFreezed = await sTokensManagerUser.isFreezed(1)
+				expect(isFreezed).to.equal(false)
 				await sTokensManagerUser.freezeTokenURI(1)
+				isFreezed = await sTokensManagerUser.isFreezed(1)
+				expect(isFreezed).to.equal(true)
 				await expect(
 					sTokensManagerUser.setTokenURIImage(1, '')
 				).to.be.revertedWith('freezed')
@@ -531,7 +518,7 @@ describe('STokensManager', () => {
 					}
 				)
 				await expect(sTokensManagerUser.freezeTokenURI(1)).to.be.revertedWith(
-					HARDHAT_ERROR
+					'no data'
 				)
 			})
 			it('already freezed.', async () => {
@@ -581,38 +568,6 @@ describe('STokensManager', () => {
 			it('deta is not found', async () => {
 				const [sTokensManager] = await init()
 				await expect(sTokensManager.positions(12345)).to.be.revertedWith(
-					HARDHAT_ERROR
-				)
-			})
-		})
-	})
-	describe('descriptors', () => {
-		describe('success', () => {
-			it('get data', async () => {
-				const [, sTokensManagerUser, lockup] = await init()
-				const mintParam = await createMintParams()
-				await lockup.executeMint(
-					mintParam.owner,
-					mintParam.property,
-					mintParam.amount,
-					mintParam.price,
-					{
-						gasLimit: 1200000,
-					}
-				)
-				await sTokensManagerUser.setTokenURIImage(1, 'http://dummy')
-				await sTokensManagerUser.freezeTokenURI(1)
-				const signers = await getSigners()
-				let descriptor = await sTokensManagerUser.descriptors(1)
-				expect(descriptor[0]).to.equal(true)
-				expect(descriptor[1]).to.equal(signers.user.address)
-				expect(descriptor[2]).to.equal('http://dummy')
-			})
-		})
-		describe('fail', () => {
-			it('deta is not found', async () => {
-				const [, sTokensManagerUser] = await init()
-				await expect(sTokensManagerUser.descriptors(12345)).to.be.revertedWith(
 					HARDHAT_ERROR
 				)
 			})

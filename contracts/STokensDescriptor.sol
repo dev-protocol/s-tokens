@@ -4,8 +4,8 @@ pragma solidity 0.8.4;
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {AddressLib} from "@devprotocol/util-contracts/contracts/utils/AddressLib.sol";
 import {Base64} from "@devprotocol/util-contracts/contracts/utils/Base64.sol";
-import {ISTokenManagerDescriptor} from "./interface/ISTokenManagerDescriptor.sol";
 import {ISTokenManagerStruct} from "./interface/ISTokenManagerStruct.sol";
+import {ISTokenManagerDescriptor} from "./interface/ISTokenManagerDescriptor.sol";
 
 contract STokensDescriptor is ISTokenManagerDescriptor, ISTokenManagerStruct {
 	using Base64 for bytes;
