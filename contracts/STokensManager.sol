@@ -167,21 +167,6 @@ contract STokensManager is
 		emit Freezed(_tokenId, _msgSender());
 	}
 
-	function meltTokenURI(uint256 _tokenId) external override {
-		DescriptorsV1 memory currentDescriptor = getStorageDescriptorsV1(
-			_tokenId
-		);
-		require(currentDescriptor.isFreezed == true, "not freezed");
-		require(
-			currentDescriptor.freezingUser == _msgSender(),
-			"illegal access"
-		);
-		currentDescriptor.isFreezed = false;
-		currentDescriptor.freezingUser = address(0);
-		setStorageDescriptorsV1(_tokenId, currentDescriptor);
-		emit Melted(_tokenId, _msgSender());
-	}
-
 	function positions(uint256 _tokenId)
 		external
 		view
