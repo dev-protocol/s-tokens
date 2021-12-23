@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
-
 /* eslint-disable prefer-destructuring */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 /* eslint-disable new-cap */
 import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
@@ -119,9 +117,15 @@ describe('STokensManager', () => {
 						gasLimit: 1200000,
 					}
 				)
-				await sTokensManagerUser.setTokenURIImage(1, 'http://hogehoge')
+				await sTokensManagerUser.setTokenURIImage(1, 'ipfs://IPFS-CID')
 				const uri = await sTokensManager.tokenURI(1)
-				expect(uri).to.equal('http://hogehoge')
+				checkTokenUri(
+					uri,
+					mintParam.property,
+					mintParam.amount,
+					0,
+					'ipfs://IPFS-CID'
+				)
 			})
 		})
 		describe('fail', () => {
@@ -384,9 +388,15 @@ describe('STokensManager', () => {
 						gasLimit: 1200000,
 					}
 				)
-				await sTokensManagerUser.setTokenURIImage(1, 'http://dummy')
+				await sTokensManagerUser.setTokenURIImage(1, 'ipfs://IPFS-CID')
 				const tokenUri = await sTokensManager.tokenURI(1)
-				expect(tokenUri).to.equal('http://dummy')
+				checkTokenUri(
+					tokenUri,
+					mintParam.property,
+					mintParam.amount,
+					0,
+					'ipfs://IPFS-CID'
+				)
 			})
 			it('get overwritten data', async () => {
 				const [, sTokensManagerUser, lockup] = await init()
@@ -400,10 +410,16 @@ describe('STokensManager', () => {
 						gasLimit: 1200000,
 					}
 				)
-				await sTokensManagerUser.setTokenURIImage(1, 'http://dummy')
-				await sTokensManagerUser.setTokenURIImage(1, 'http://dummy2')
+				await sTokensManagerUser.setTokenURIImage(1, 'ipfs://IPFS-CID')
+				await sTokensManagerUser.setTokenURIImage(1, 'ipfs://IPFS-CID2')
 				const tokenUri = await sTokensManagerUser.tokenURI(1)
-				expect(tokenUri).to.equal('http://dummy2')
+				checkTokenUri(
+					tokenUri,
+					mintParam.property,
+					mintParam.amount,
+					0,
+					'ipfs://IPFS-CID2'
+				)
 			})
 		})
 		describe('fail', () => {

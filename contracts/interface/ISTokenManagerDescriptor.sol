@@ -6,9 +6,15 @@ import {ISTokenManagerStruct} from "./ISTokenManagerStruct.sol";
 interface ISTokenManagerDescriptor {
 	/*
 	 * @dev get toke uri from position information.
-	 * @param _position The struct of positon information
+	 * @param _property The struct of positon information
+	 * @param _amount The struct of positon information
+	 * @param _cumulativeReward Cumulative Rewards
+	 * @param _tokeUriImage The struct of positon information
 	 */
 	function getTokenURI(
-		ISTokenManagerStruct.StakingPositionV1 memory _position
+		address _property,
+		uint256 _amount,
+		uint256 _cumulativeReward,
+		string memory _tokeUriImage
 	) external pure returns (string memory);
 }
