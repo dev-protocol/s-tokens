@@ -18,16 +18,4 @@ interface ISTokenManagerStruct {
 		uint256 cumulativeReward;
 		uint256 pendingReward;
 	}
-
-	/*
-	 * @dev Struct to customize token uri.
-	 * @param isFreezed Whether the descriptor can be changed or not
-	 * @param freezingUser Authors who have done the Freeze process
-	 * @param descriptor File Contents
-	 */
-	struct DescriptorsV1 {
-		bool isFreezed;
-		address freezingUser;
-		string descriptor;
-	}
 }
