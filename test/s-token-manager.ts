@@ -2,10 +2,12 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { expect, use } from 'chai'
 import { ethers } from 'hardhat'
 import { Contract, constants, BigNumber } from 'ethers'
-import { solidity } from 'ethereum-waffle'
+import { solidity, MockProvider } from 'ethereum-waffle'
 import {
 	deploy,
 	deployWithArg,
@@ -20,13 +22,17 @@ import { checkTokenUri } from './token-uri-test'
 use(solidity)
 
 describe('STokensManager', () => {
-	const init = async (): Promise<[Contract, Contract, Contract, Contract]> => {
+	const init = async (): Promise<
+		[Contract, Contract, Contract, Contract, Contract, Contract]
+	> => {
 		const signers = await getSigners()
 		const addressConfig = await deploy('AddressConfigTest')
 		const sTokensManager = await deploy('STokensManager')
 		const sTokensDescriptor = await deploy('STokensDescriptor')
 		const data = ethers.utils.arrayify('0x')
 		const proxyAdmin = await deploy('STokensManagerProxyAdmin')
+		const tokenURIDescriptor = await deploy('TokenURIDescriptorTest')
+		const metricsGroup = await deploy('MetricsGroupTest')
 		const proxy = await deployWith3Arg(
 			'STokensManagerProxy',
 			sTokensManager.address,
@@ -41,8 +47,16 @@ describe('STokensManager', () => {
 		await proxyDelegate.setDescriptor(sTokensDescriptor.address)
 		const lockup = await deployWithArg('LockupTest', proxyDelegate.address)
 		await addressConfig.setLockup(lockup.address)
+		await addressConfig.setMetricsGroup(metricsGroup.address)
 		const sTokensManagerUser = proxyDelegate.connect(signers.user)
-		return [proxyDelegate, sTokensManagerUser, lockup, sTokensDescriptor]
+		return [
+			proxyDelegate,
+			sTokensManagerUser,
+			lockup,
+			sTokensDescriptor,
+			tokenURIDescriptor,
+			metricsGroup,
+		]
 	}
 
 	describe('initialize', () => {
@@ -127,13 +141,44 @@ describe('STokensManager', () => {
 					'ipfs://IPFS-CID'
 				)
 			})
+			it('get descriptor token uri', async () => {
+				const [
+					sTokensManager,
+					sTokensManagerUser,
+					lockup,
+					,
+					tokenURIDescriptor,
+					metricsGroup,
+				] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await metricsGroup.setResult(mintParam.property)
+				await sTokensManagerUser.setTokenURIDescriptor(
+					mintParam.property,
+					tokenURIDescriptor.address
+				)
+				const uri = await sTokensManager.tokenURI(1)
+				checkTokenUri(
+					uri,
+					mintParam.property,
+					mintParam.amount,
+					0,
+					'dummy-string'
+				)
+			})
 		})
 		describe('fail', () => {
 			it('can not get token symbol', async () => {
 				const [sTokensManager] = await init()
-				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith(
-					HARDHAT_ERROR
-				)
+				await expect(sTokensManager.tokenURI(1)).to.be.revertedWith('not found')
 			})
 		})
 	})
@@ -969,6 +1014,190 @@ describe('STokensManager', () => {
 				expect(tokenIdsUser.length).to.equal(1)
 				expect(tokenIdsUser[0].toNumber()).to.equal(3)
 			})
+		})
+	})
+	describe('setTokenURIDescriptor', () => {
+		describe('success', () => {
+			it('set descriptor address', async () => {
+				const [
+					sTokensManager,
+					sTokensManagerUser,
+					,
+					,
+					tokenURIDescriptor,
+					metricsGroup,
+				] = await init()
+				const mintParam = await createMintParams()
+				await metricsGroup.setResult(mintParam.property)
+				await sTokensManagerUser.setTokenURIDescriptor(
+					mintParam.property,
+					tokenURIDescriptor.address
+				)
+				const tmp = await sTokensManager.descriptorOf(mintParam.property)
+				expect(tmp).to.equal(tokenURIDescriptor.address)
+			})
+		})
+		describe('fail', () => {
+			it('illegal property', async () => {
+				const [, sTokensManagerUser, , , tokenURIDescriptor, ,] = await init()
+				const mintParam = await createMintParams()
+				await expect(
+					sTokensManagerUser.setTokenURIDescriptor(
+						mintParam.property,
+						tokenURIDescriptor.address
+					)
+				).to.be.revertedWith('illegal property')
+			})
+			it('illegal property', async () => {
+				const [sTokensManager, , lockup, , tokenURIDescriptor, metricsGroup] =
+					await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await metricsGroup.setResult(mintParam.property)
+				await expect(
+					sTokensManager.setTokenURIDescriptor(
+						mintParam.property,
+						tokenURIDescriptor.address
+					)
+				).to.be.revertedWith('illegal access')
+			})
+		})
+	})
+	describe('currentIndex', () => {
+		describe('success', () => {
+			it('get initial token id number', async () => {
+				const [sTokensManager, , , , , ,] = await init()
+				const tmp = await sTokensManager.currentIndex()
+				expect(tmp.toString()).to.equal('0')
+			})
+			it('get currentIndex token id number', async () => {
+				const [sTokensManager, , lockup, , , ,] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tmp = await sTokensManager.currentIndex()
+				expect(tmp.toString()).to.equal('1')
+			})
+		})
+	})
+	describe('tokenURISim', () => {
+		const generateParams = (): [any, any] => {
+			const provider = new MockProvider()
+			const property = provider.createEmptyWallet()
+			const positions = {
+				property: property.address,
+				amount: 10,
+				price: 100,
+				cumulativeReward: 1000,
+				pendingReward: 10000,
+			}
+			const reward = {
+				entireReward: 100,
+				cumulativeReward: 1000,
+				withdrawableReward: 10000,
+			}
+			return [positions, reward]
+		}
+
+		it('default token uri', async () => {
+			const [positions, rewards] = generateParams()
+			const [sTokensManager, , , , , ,] = await init()
+			const tmp = await sTokensManager.tokenURISim(
+				1,
+				constants.AddressZero,
+				positions,
+				rewards
+			)
+			checkTokenUri(
+				tmp,
+				positions.property,
+				positions.amount,
+				positions.cumulativeReward
+			)
+		})
+		it('set token uri image', async () => {
+			const [positions, rewards] = generateParams()
+			const [sTokensManager, sTokensManagerUser, lockup] = await init()
+			const mintParam = await createMintParams()
+			await lockup.executeMint(
+				mintParam.owner,
+				mintParam.property,
+				mintParam.amount,
+				mintParam.price,
+				{
+					gasLimit: 1200000,
+				}
+			)
+			await sTokensManagerUser.setTokenURIImage(1, 'ipfs://IPFS-CID')
+
+			const tokenUri = await sTokensManager.tokenURISim(
+				1,
+				constants.AddressZero,
+				positions,
+				rewards
+			)
+			checkTokenUri(
+				tokenUri,
+				positions.property,
+				positions.amount,
+				positions.cumulativeReward,
+				'ipfs://IPFS-CID'
+			)
+		})
+		it('default descriptor', async () => {
+			const [positions, rewards] = generateParams()
+			const [
+				sTokensManager,
+				sTokensManagerUser,
+				lockup,
+				,
+				tokenURIDescriptor,
+				metricsGroup,
+			] = await init()
+			const mintParam = await createMintParams()
+			positions.property = mintParam.property
+			await lockup.executeMint(
+				mintParam.owner,
+				mintParam.property,
+				mintParam.amount,
+				mintParam.price,
+				{
+					gasLimit: 1200000,
+				}
+			)
+			await metricsGroup.setResult(mintParam.property)
+			await sTokensManagerUser.setTokenURIDescriptor(
+				mintParam.property,
+				tokenURIDescriptor.address
+			)
+			const tmp = await sTokensManager.tokenURISim(
+				1,
+				constants.AddressZero,
+				positions,
+				rewards
+			)
+			checkTokenUri(
+				tmp,
+				positions.property,
+				positions.amount,
+				positions.cumulativeReward,
+				'dummy-string'
+			)
 		})
 	})
 })
