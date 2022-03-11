@@ -11,7 +11,6 @@ import {ITokenURIDescriptor} from "./interface/ITokenURIDescriptor.sol";
 import {IAddressConfig} from "./interface/IAddressConfig.sol";
 import {ILockup} from "./interface/ILockup.sol";
 import {IProperty} from "./interface/IProperty.sol";
-import {IMetricsGroup} from "./interface/IMetricsGroup.sol";
 
 contract STokensManager is
 	ISTokenManagerStruct,
@@ -41,11 +40,6 @@ contract STokensManager is
 	}
 
 	modifier onlyPropertyAuthor(address _property) {
-		address metricsGroup = IAddressConfig(config).metricsGroup();
-		require(
-			IMetricsGroup(metricsGroup).hasAssets(_property),
-			"illegal property"
-		);
 		address author = IProperty(_property).author();
 		require(author == _msgSender(), "illegal access");
 		_;

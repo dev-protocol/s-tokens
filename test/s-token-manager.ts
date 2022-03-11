@@ -23,7 +23,7 @@ use(solidity)
 
 describe('STokensManager', () => {
 	const init = async (): Promise<
-		[Contract, Contract, Contract, Contract, Contract, Contract]
+		[Contract, Contract, Contract, Contract, Contract]
 	> => {
 		const signers = await getSigners()
 		const addressConfig = await deploy('AddressConfigTest')
@@ -32,7 +32,6 @@ describe('STokensManager', () => {
 		const data = ethers.utils.arrayify('0x')
 		const proxyAdmin = await deploy('STokensManagerProxyAdmin')
 		const tokenURIDescriptor = await deploy('TokenURIDescriptorTest')
-		const metricsGroup = await deploy('MetricsGroupTest')
 		const proxy = await deployWith3Arg(
 			'STokensManagerProxy',
 			sTokensManager.address,
@@ -47,7 +46,6 @@ describe('STokensManager', () => {
 		await proxyDelegate.setDescriptor(sTokensDescriptor.address)
 		const lockup = await deployWithArg('LockupTest', proxyDelegate.address)
 		await addressConfig.setLockup(lockup.address)
-		await addressConfig.setMetricsGroup(metricsGroup.address)
 		const sTokensManagerUser = proxyDelegate.connect(signers.user)
 		return [
 			proxyDelegate,
@@ -55,7 +53,6 @@ describe('STokensManager', () => {
 			lockup,
 			sTokensDescriptor,
 			tokenURIDescriptor,
-			metricsGroup,
 		]
 	}
 
@@ -148,7 +145,6 @@ describe('STokensManager', () => {
 					lockup,
 					,
 					tokenURIDescriptor,
-					metricsGroup,
 				] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(
@@ -160,7 +156,6 @@ describe('STokensManager', () => {
 						gasLimit: 1200000,
 					}
 				)
-				await metricsGroup.setResult(mintParam.property)
 				await sTokensManagerUser.setTokenURIDescriptor(
 					mintParam.property,
 					tokenURIDescriptor.address
@@ -1019,16 +1014,9 @@ describe('STokensManager', () => {
 	describe('setTokenURIDescriptor', () => {
 		describe('success', () => {
 			it('set descriptor address', async () => {
-				const [
-					sTokensManager,
-					sTokensManagerUser,
-					,
-					,
-					tokenURIDescriptor,
-					metricsGroup,
-				] = await init()
+				const [sTokensManager, sTokensManagerUser, , , tokenURIDescriptor] =
+					await init()
 				const mintParam = await createMintParams()
-				await metricsGroup.setResult(mintParam.property)
 				await sTokensManagerUser.setTokenURIDescriptor(
 					mintParam.property,
 					tokenURIDescriptor.address
@@ -1038,19 +1026,8 @@ describe('STokensManager', () => {
 			})
 		})
 		describe('fail', () => {
-			it('illegal property', async () => {
-				const [, sTokensManagerUser, , , tokenURIDescriptor, ,] = await init()
-				const mintParam = await createMintParams()
-				await expect(
-					sTokensManagerUser.setTokenURIDescriptor(
-						mintParam.property,
-						tokenURIDescriptor.address
-					)
-				).to.be.revertedWith('illegal property')
-			})
-			it('illegal property', async () => {
-				const [sTokensManager, , lockup, , tokenURIDescriptor, metricsGroup] =
-					await init()
+			it('illegal access', async () => {
+				const [sTokensManager, , lockup, , tokenURIDescriptor] = await init()
 				const mintParam = await createMintParams()
 				await lockup.executeMint(
 					mintParam.owner,
@@ -1061,7 +1038,6 @@ describe('STokensManager', () => {
 						gasLimit: 1200000,
 					}
 				)
-				await metricsGroup.setResult(mintParam.property)
 				await expect(
 					sTokensManager.setTokenURIDescriptor(
 						mintParam.property,
@@ -1161,14 +1137,8 @@ describe('STokensManager', () => {
 		})
 		it('default descriptor', async () => {
 			const [positions, rewards] = generateParams()
-			const [
-				sTokensManager,
-				sTokensManagerUser,
-				lockup,
-				,
-				tokenURIDescriptor,
-				metricsGroup,
-			] = await init()
+			const [sTokensManager, sTokensManagerUser, lockup, , tokenURIDescriptor] =
+				await init()
 			const mintParam = await createMintParams()
 			positions.property = mintParam.property
 			await lockup.executeMint(
@@ -1180,7 +1150,6 @@ describe('STokensManager', () => {
 					gasLimit: 1200000,
 				}
 			)
-			await metricsGroup.setResult(mintParam.property)
 			await sTokensManagerUser.setTokenURIDescriptor(
 				mintParam.property,
 				tokenURIDescriptor.address
