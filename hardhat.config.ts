@@ -1,9 +1,14 @@
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
+import * as dotenv from 'dotenv'
 
-const alchemyApiKey = 'og4nnWIt39kz8KxzEN46npdmvtFiWkdr'
-const mnemonic = ''
-const etherscanApiKey = '8VQZGVMNHTAJEM531Z7SUYZK13MCZIIEY7'
+dotenv.config()
+
+const alchemyApiKeyMainnet = process.env.ALCHEMY_KEY_MAINNET
+const alchemyApiKeyRopsten = process.env.ALCHEMY_KEY_ROPSTEN
+const alchemyApiKeyRinkeby = process.env.ALCHEMY_KEY_RINKEBY
+const mnemonic = process.env.MNEMONIC
+const etherscanApiKey = process.env.ETHERSCAN_KEY
 
 module.exports = {
 	mocha: {
@@ -12,11 +17,15 @@ module.exports = {
 	solidity: '0.8.4',
 	networks: {
 		ropsten: {
-			url: `https://eth-rinkeby.alchemyapi.io/v2/${alchemyApiKey}`,
+			url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyApiKeyRopsten}`,
+			accounts: { mnemonic },
+		},
+		rinkeby: {
+			url: `https://eth-rinkeby.alchemyapi.io/v2/${alchemyApiKeyRinkeby}`,
 			accounts: { mnemonic },
 		},
 		mainnet: {
-			url: `https://eth.alchemyapi.io/v2/${alchemyApiKey}`,
+			url: `https://eth.alchemyapi.io/v2/${alchemyApiKeyMainnet}`,
 			accounts: { mnemonic },
 		},
 	},
