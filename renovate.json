@@ -19,7 +19,7 @@
 		},
 		{
 			"packageNames": ["@devprotocol/i-s-tokens"],
-			"allowedVersions": "1.5.1"
+			"allowedVersions": "1.7.0"
 		}
 	]
 }

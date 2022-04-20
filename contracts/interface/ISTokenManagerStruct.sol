@@ -18,4 +18,17 @@ interface ISTokenManagerStruct {
 		uint256 cumulativeReward;
 		uint256 pendingReward;
 	}
+
+	/*
+	 * @dev Struct to declares staking rewards.
+	 * @param entireReward The reward amount of adding the cumulative withdrawn amount
+	 to the withdrawable amount
+	 * @param cumulativeReward The cumulative withdrawn reward amount
+	 * @param withdrawableReward The withdrawable reward amount
+	 */
+	struct RewardsV1 {
+		uint256 entireReward;
+		uint256 cumulativeReward;
+		uint256 withdrawableReward;
+	}
 }

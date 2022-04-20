@@ -7,6 +7,7 @@ import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
 import {ISTokenManagerStruct} from "./interface/ISTokenManagerStruct.sol";
 import {ISTokenManagerDescriptor} from "./interface/ISTokenManagerDescriptor.sol";
+import {ITokenURIDescriptor} from "./interface/ITokenURIDescriptor.sol";
 import {IAddressConfig} from "./interface/IAddressConfig.sol";
 import {ILockup} from "./interface/ILockup.sol";
 import {IProperty} from "./interface/IProperty.sol";
@@ -24,6 +25,7 @@ contract STokensManager is
 	mapping(uint256 => string) private tokenUriImage;
 	mapping(uint256 => bool) public override isFreezed;
 	address public descriptor;
+	mapping(address => address) public override descriptorOf;
 
 	using Counters for Counters.Counter;
 	using EnumerableSet for EnumerableSet.UintSet;
@@ -33,6 +35,12 @@ contract STokensManager is
 			_tokenId
 		);
 		address author = IProperty(currentPosition.property).author();
+		require(author == _msgSender(), "illegal access");
+		_;
+	}
+
+	modifier onlyPropertyAuthor(address _property) {
+		address author = IProperty(_property).author();
 		require(author == _msgSender(), "illegal access");
 		_;
 	}
@@ -61,15 +69,25 @@ contract STokensManager is
 		override
 		returns (string memory)
 	{
-		string memory _tokeUriImage = tokenUriImage[_tokenId];
+		uint256 curretnTokenId = tokenIdCounter.current();
+		require(_tokenId <= curretnTokenId, "not found");
 		StakingPositionV1 memory positons = getStoragePositionsV1(_tokenId);
-		return
-			ISTokenManagerDescriptor(descriptor).getTokenURI(
-				positons.property,
-				positons.amount,
-				positons.cumulativeReward,
-				_tokeUriImage
-			);
+		RewardsV1 memory tokenRewards = _rewards(_tokenId);
+		address owner = ownerOf(_tokenId);
+		return _tokenURI(_tokenId, owner, positons, tokenRewards);
+	}
+
+	function tokenURISim(
+		uint256 _tokenId,
+		address _owner,
+		StakingPositionV1 memory _positions,
+		RewardsV1 memory _rewardsArg
+	) external view returns (string memory) {
+		return _tokenURI(_tokenId, _owner, _positions, _rewardsArg);
+	}
+
+	function currentIndex() external view override returns (uint256) {
+		return tokenIdCounter.current();
 	}
 
 	function mint(
@@ -133,6 +151,14 @@ contract STokensManager is
 		tokenUriImage[_tokenId] = _data;
 	}
 
+	function setTokenURIDescriptor(address _property, address _descriptor)
+		external
+		override
+		onlyPropertyAuthor(_property)
+	{
+		descriptorOf[_property] = _descriptor;
+	}
+
 	function freezeTokenURI(uint256 _tokenId)
 		external
 		override
@@ -179,16 +205,12 @@ contract STokensManager is
 			uint256 withdrawableReward_
 		)
 	{
-		address lockupAddress = IAddressConfig(config).lockup();
-		uint256 withdrawableReward = ILockup(lockupAddress)
-			.calculateWithdrawableInterestAmountByPosition(_tokenId);
-		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
-			_tokenId
+		RewardsV1 memory tokenRewards = _rewards(_tokenId);
+		return (
+			tokenRewards.entireReward,
+			tokenRewards.cumulativeReward,
+			tokenRewards.withdrawableReward
 		);
-		uint256 cumulativeReward = currentPosition.cumulativeReward;
-		uint256 entireReward = cumulativeReward + withdrawableReward;
-
-		return (entireReward, cumulativeReward, withdrawableReward);
 	}
 
 	function positionsOfProperty(address _property)
@@ -207,6 +229,50 @@ contract STokensManager is
 		returns (uint256[] memory)
 	{
 		return tokenIdsMapOfOwner[_owner].values();
+	}
+
+	function _rewards(uint256 _tokenId)
+		private
+		view
+		returns (RewardsV1 memory)
+	{
+		address lockupAddress = IAddressConfig(config).lockup();
+		uint256 withdrawableReward = ILockup(lockupAddress)
+			.calculateWithdrawableInterestAmountByPosition(_tokenId);
+		StakingPositionV1 memory currentPosition = getStoragePositionsV1(
+			_tokenId
+		);
+		uint256 cumulativeReward = currentPosition.cumulativeReward;
+		uint256 entireReward = cumulativeReward + withdrawableReward;
+
+		return RewardsV1(entireReward, cumulativeReward, withdrawableReward);
+	}
+
+	function _tokenURI(
+		uint256 _tokenId,
+		address _owner,
+		StakingPositionV1 memory _positions,
+		RewardsV1 memory _rewardsArg
+	) private view returns (string memory) {
+		string memory _tokeUriImage = tokenUriImage[_tokenId];
+		if (bytes(_tokeUriImage).length == 0) {
+			address descriptorOfProperty = descriptorOf[_positions.property];
+			if (descriptorOfProperty != address(0)) {
+				_tokeUriImage = ITokenURIDescriptor(descriptorOfProperty).image(
+						_tokenId,
+						_owner,
+						_positions,
+						_rewardsArg
+					);
+			}
+		}
+		return
+			ISTokenManagerDescriptor(descriptor).getTokenURI(
+				_positions.property,
+				_positions.amount,
+				_positions.cumulativeReward,
+				_tokeUriImage
+			);
 	}
 
 	function getStoragePositionsV1(uint256 _tokenId)
