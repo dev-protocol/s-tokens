@@ -31,13 +31,15 @@ contract LockupTest {
 		address _owner,
 		address _property,
 		uint256 _amount,
-		uint256 _price
+		uint256 _price,
+		bytes32 _payload
 	) external {
 		latestTokenId = ISTokensManager(sTokensManager).mint(
 			_owner,
 			_property,
 			_amount,
-			_price
+			_price,
+			_payload
 		);
 	}
 
