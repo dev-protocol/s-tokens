@@ -1203,7 +1203,8 @@ describe('STokensManager', () => {
 				1,
 				constants.AddressZero,
 				positions,
-				rewards
+				rewards,
+				ethers.constants.HashZero
 			)
 			checkTokenUri(
 				tmp,
@@ -1232,7 +1233,8 @@ describe('STokensManager', () => {
 				1,
 				constants.AddressZero,
 				positions,
-				rewards
+				rewards,
+				ethers.constants.HashZero
 			)
 			checkTokenUri(
 				tokenUri,
@@ -1266,7 +1268,8 @@ describe('STokensManager', () => {
 				1,
 				constants.AddressZero,
 				positions,
-				rewards
+				rewards,
+				ethers.constants.HashZero
 			)
 			checkTokenUri(
 				tmp,
