@@ -60,10 +60,7 @@ contract STokensManager is
 	}
 
 	function setDescriptor(address _descriptor) external {
-		require(
-			descriptor != 0x0C7D344771B84298d2aa73Af95682b483Ea53389,
-			"already set"
-		);
+		require(descriptor == address(0), "already set");
 		descriptor = _descriptor;
 	}
 
