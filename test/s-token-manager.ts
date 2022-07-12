@@ -106,6 +106,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -116,6 +117,30 @@ describe('STokensManager', () => {
 				const uri = await sTokensManager.tokenURI(Number(tokenId))
 				checkTokenUri(uri, mintParam.property, mintParam.amount, 0)
 			})
+			it('get token uri with big staked amount', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					constants.MaxUint256,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const filter = sTokensManager.filters.Transfer()
+				const events = await sTokensManager.queryFilter(filter)
+				const tokenId = events[0].args!.tokenId.toString()
+				const uri = await sTokensManager.tokenURI(Number(tokenId))
+				checkTokenUri(
+					uri,
+					mintParam.property,
+					constants.MaxUint256.toString(),
+					0
+				)
+			})
 			it('get custom token uri', async () => {
 				const [sTokensManager, sTokensManagerUser, lockup] = await init()
 				const mintParam = await createMintParams()
@@ -124,6 +149,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -152,6 +178,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -187,6 +214,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -195,6 +223,22 @@ describe('STokensManager', () => {
 				expect(tokenId.toString()).to.equal('1')
 				const owner = await sTokensManager.ownerOf(1)
 				expect(owner).to.equal(mintParam.owner)
+			})
+			it('stores the payload', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const payload = await sTokensManager.payloadOf(1)
+				expect(payload).to.equal(mintParam.payload)
 			})
 			it('generate minted event', async () => {
 				const [sTokensManager, , lockup] = await init()
@@ -205,6 +249,7 @@ describe('STokensManager', () => {
 						mintParam.property,
 						mintParam.amount,
 						mintParam.price,
+						mintParam.payload,
 						{
 							gasLimit: 1200000,
 						}
@@ -227,6 +272,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -248,6 +294,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -261,6 +308,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -279,7 +327,8 @@ describe('STokensManager', () => {
 						mintParam.owner,
 						mintParam.property,
 						mintParam.amount,
-						mintParam.price
+						mintParam.price,
+						mintParam.payload
 					)
 				).to.be.revertedWith('illegal access')
 			})
@@ -291,7 +340,8 @@ describe('STokensManager', () => {
 						mintParam.owner,
 						mintParam.property,
 						mintParam.amount,
-						mintParam.price
+						mintParam.price,
+						mintParam.payload
 					)
 				).to.be.revertedWith('illegal access')
 			})
@@ -307,6 +357,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -346,6 +397,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -424,6 +476,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -446,6 +499,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -471,6 +525,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -487,6 +542,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -510,6 +566,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -532,6 +589,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -552,6 +610,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -569,6 +628,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -585,6 +645,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -608,6 +669,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -639,6 +701,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -657,6 +720,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -696,6 +760,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -714,6 +779,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -724,6 +790,7 @@ describe('STokensManager', () => {
 					mintParam2.property,
 					mintParam2.amount,
 					mintParam2.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -747,6 +814,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -756,6 +824,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -786,6 +855,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -802,6 +872,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -812,6 +883,7 @@ describe('STokensManager', () => {
 					mintParam2.property,
 					mintParam2.amount,
 					mintParam2.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -833,6 +905,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -842,6 +915,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -867,6 +941,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -876,6 +951,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -885,6 +961,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -917,6 +994,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -926,6 +1004,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -935,6 +1014,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -967,6 +1047,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -976,6 +1057,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -985,6 +1067,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -1024,6 +1107,28 @@ describe('STokensManager', () => {
 				const tmp = await sTokensManager.descriptorOf(mintParam.property)
 				expect(tmp).to.equal(tokenURIDescriptor.address)
 			})
+			it('call onBeforeMint when minting', async () => {
+				const [, sTokensManagerUser, lockup, , tokenURIDescriptor] =
+					await init()
+				const signers = await getSigners()
+				const mintParam = await createMintParams()
+				await sTokensManagerUser.setTokenURIDescriptor(
+					mintParam.property,
+					tokenURIDescriptor.address
+				)
+				await lockup.executeMint(
+					signers.deployer.address,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const payload = await tokenURIDescriptor.dataOf(1)
+				expect(payload).to.equal(mintParam.payload)
+			})
 		})
 		describe('fail', () => {
 			it('illegal access', async () => {
@@ -1034,6 +1139,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -1044,6 +1150,29 @@ describe('STokensManager', () => {
 						tokenURIDescriptor.address
 					)
 				).to.be.revertedWith('illegal access')
+			})
+			it('revert on onBeforeMint', async () => {
+				const [, sTokensManagerUser, lockup, , tokenURIDescriptor] =
+					await init()
+				const signers = await getSigners()
+				const mintParam = await createMintParams()
+				await sTokensManagerUser.setTokenURIDescriptor(
+					mintParam.property,
+					tokenURIDescriptor.address
+				)
+				await tokenURIDescriptor.__shouldBe(false)
+				await expect(
+					lockup.executeMint(
+						signers.deployer.address,
+						mintParam.property,
+						mintParam.amount,
+						mintParam.price,
+						mintParam.payload,
+						{
+							gasLimit: 1200000,
+						}
+					)
+				).to.be.revertedWith('failed to call onBeforeMint')
 			})
 		})
 	})
@@ -1062,6 +1191,7 @@ describe('STokensManager', () => {
 					mintParam.property,
 					mintParam.amount,
 					mintParam.price,
+					mintParam.payload,
 					{
 						gasLimit: 1200000,
 					}
@@ -1097,7 +1227,8 @@ describe('STokensManager', () => {
 				1,
 				constants.AddressZero,
 				positions,
-				rewards
+				rewards,
+				ethers.constants.HashZero
 			)
 			checkTokenUri(
 				tmp,
@@ -1115,6 +1246,7 @@ describe('STokensManager', () => {
 				mintParam.property,
 				mintParam.amount,
 				mintParam.price,
+				mintParam.payload,
 				{
 					gasLimit: 1200000,
 				}
@@ -1125,7 +1257,8 @@ describe('STokensManager', () => {
 				1,
 				constants.AddressZero,
 				positions,
-				rewards
+				rewards,
+				ethers.constants.HashZero
 			)
 			checkTokenUri(
 				tokenUri,
@@ -1146,6 +1279,7 @@ describe('STokensManager', () => {
 				mintParam.property,
 				mintParam.amount,
 				mintParam.price,
+				mintParam.payload,
 				{
 					gasLimit: 1200000,
 				}
@@ -1158,7 +1292,8 @@ describe('STokensManager', () => {
 				1,
 				constants.AddressZero,
 				positions,
-				rewards
+				rewards,
+				ethers.constants.HashZero
 			)
 			checkTokenUri(
 				tmp,

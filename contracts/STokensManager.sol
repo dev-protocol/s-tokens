@@ -26,6 +26,7 @@ contract STokensManager is
 	mapping(uint256 => bool) public override isFreezed;
 	address public descriptor;
 	mapping(address => address) public override descriptorOf;
+	mapping(uint256 => bytes32) public override payloadOf;
 
 	using Counters for Counters.Counter;
 	using EnumerableSet for EnumerableSet.UintSet;
@@ -74,16 +75,24 @@ contract STokensManager is
 		StakingPositionV1 memory positons = getStoragePositionsV1(_tokenId);
 		RewardsV1 memory tokenRewards = _rewards(_tokenId);
 		address owner = ownerOf(_tokenId);
-		return _tokenURI(_tokenId, owner, positons, tokenRewards);
+		return
+			_tokenURI(
+				_tokenId,
+				owner,
+				positons,
+				tokenRewards,
+				payloadOf[_tokenId]
+			);
 	}
 
 	function tokenURISim(
 		uint256 _tokenId,
 		address _owner,
 		StakingPositionV1 memory _positions,
-		RewardsV1 memory _rewardsArg
+		RewardsV1 memory _rewardsArg,
+		bytes32 _payload
 	) external view returns (string memory) {
-		return _tokenURI(_tokenId, _owner, _positions, _rewardsArg);
+		return _tokenURI(_tokenId, _owner, _positions, _rewardsArg, _payload);
 	}
 
 	function currentIndex() external view override returns (uint256) {
@@ -94,17 +103,13 @@ contract STokensManager is
 		address _owner,
 		address _property,
 		uint256 _amount,
-		uint256 _price
+		uint256 _price,
+		bytes32 _payload
 	) external override onlyLockup returns (uint256 tokenId_) {
 		tokenIdCounter.increment();
-		_mint(_owner, tokenIdCounter.current());
-		emit Minted(
-			tokenIdCounter.current(),
-			_owner,
-			_property,
-			_amount,
-			_price
-		);
+		uint256 currentId = tokenIdCounter.current();
+		_mint(_owner, currentId);
+		emit Minted(currentId, _owner, _property, _amount, _price);
 		StakingPositionV1 memory newPosition = StakingPositionV1(
 			_property,
 			_amount,
@@ -112,9 +117,24 @@ contract STokensManager is
 			0,
 			0
 		);
-		setStoragePositionsV1(tokenIdCounter.current(), newPosition);
-		tokenIdsMap[_property].push(tokenIdCounter.current());
-		return tokenIdCounter.current();
+		setStoragePositionsV1(currentId, newPosition);
+		tokenIdsMap[_property].push(currentId);
+
+		address _descriptor = descriptorOf[_property];
+		if (_descriptor != address(0)) {
+			require(
+				ITokenURIDescriptor(_descriptor).onBeforeMint(
+					currentId,
+					_owner,
+					newPosition,
+					_payload
+				),
+				"failed to call onBeforeMint"
+			);
+		}
+		payloadOf[currentId] = _payload;
+
+		return currentId;
 	}
 
 	function update(
@@ -252,7 +272,8 @@ contract STokensManager is
 		uint256 _tokenId,
 		address _owner,
 		StakingPositionV1 memory _positions,
-		RewardsV1 memory _rewardsArg
+		RewardsV1 memory _rewardsArg,
+		bytes32 _payload
 	) private view returns (string memory) {
 		string memory _tokeUriImage = tokenUriImage[_tokenId];
 		if (bytes(_tokeUriImage).length == 0) {
@@ -262,7 +283,8 @@ contract STokensManager is
 						_tokenId,
 						_owner,
 						_positions,
-						_rewardsArg
+						_rewardsArg,
+						_payload
 					);
 			}
 		}

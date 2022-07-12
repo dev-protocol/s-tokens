@@ -2,11 +2,18 @@
 import { expect } from 'chai'
 import { Buffer } from 'buffer'
 import { encode } from 'js-base64'
+import { BigNumber } from 'bignumber.js'
+
+type Attributes = Array<{
+	trait_type: string
+	value: string | number
+	display_type?: string
+}>
 
 export const checkTokenUri = (
 	tokenUri: string,
 	property: string,
-	amount: number,
+	amount: number | string,
 	cumulativeReward: number,
 	tokenUriImage = ''
 ): void => {
@@ -14,10 +21,16 @@ export const checkTokenUri = (
 	expect(uriInfo.length).to.equal(2)
 	expect(uriInfo[0]).to.equal('data:application/json;base64')
 	const decodedData = Buffer.from(uriInfo[1], 'base64').toString()
-	const details = JSON.parse(decodedData)
+	const details = JSON.parse(decodedData) as {
+		name: string
+		description: string
+		image: string
+		attributes: Attributes
+	}
 	const { name, description, image } = details
 	checkName(name, property, amount, cumulativeReward)
 	checkDescription(description, property)
+	checkAttributes(details.attributes, property, amount)
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	tokenUriImage === ''
 		? checkImage(image, property)
@@ -27,11 +40,13 @@ export const checkTokenUri = (
 const checkName = (
 	name: string,
 	property: string,
-	amount: number,
+	amount: number | string,
 	cumulativeReward: number
 ): void => {
 	expect(name).to.equal(
-		`Dev Protocol sTokens - ${property} - ${amount} DEV - ${cumulativeReward}`
+		`Dev Protocol sTokens - ${property} - ${new BigNumber(amount)
+			.div(1e18)
+			.toFixed()} DEV - ${cumulativeReward}`
 	)
 }
 
@@ -54,4 +69,19 @@ const checkImage = (image: string, property: string): void => {
 
 const checkTokenImageUri = (image: string, tokenUriImage: string): void => {
 	expect(image).to.equal(tokenUriImage)
+}
+
+const checkAttributes = (
+	attributes: Attributes,
+	property: string,
+	amount: number | string
+): void => {
+	expect(attributes).to.deep.equal([
+		{ trait_type: 'Destination', value: property },
+		{
+			trait_type: 'Locked Amount',
+			display_type: 'number',
+			value: new BigNumber(amount).div(1e18).toNumber(),
+		},
+	])
 }

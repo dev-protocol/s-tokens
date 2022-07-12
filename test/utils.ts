@@ -55,6 +55,7 @@ export const createMintParams = async (): Promise<any> => {
 		property: property.address,
 		amount: 10,
 		price: 20,
+		payload: ethers.utils.formatBytes32String('A'),
 	}
 }
 
