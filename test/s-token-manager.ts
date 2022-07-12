@@ -117,6 +117,30 @@ describe('STokensManager', () => {
 				const uri = await sTokensManager.tokenURI(Number(tokenId))
 				checkTokenUri(uri, mintParam.property, mintParam.amount, 0)
 			})
+			it('get token uri with big staked amount', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					constants.MaxUint256,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const filter = sTokensManager.filters.Transfer()
+				const events = await sTokensManager.queryFilter(filter)
+				const tokenId = events[0].args!.tokenId.toString()
+				const uri = await sTokensManager.tokenURI(Number(tokenId))
+				checkTokenUri(
+					uri,
+					mintParam.property,
+					constants.MaxUint256.toString(),
+					0
+				)
+			})
 			it('get custom token uri', async () => {
 				const [sTokensManager, sTokensManagerUser, lockup] = await init()
 				const mintParam = await createMintParams()
