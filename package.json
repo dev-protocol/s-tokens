@@ -22,7 +22,7 @@
 		"@nomiclabs/hardhat-ethers": "2.1.0",
 		"@nomiclabs/hardhat-etherscan": "3.1.0",
 		"@nomiclabs/hardhat-waffle": "2.0.3",
-		"@types/chai": "4.3.2",
+		"@types/chai": "4.3.3",
 		"@types/dotenv": "8.2.0",
 		"@types/mocha": "9.1.1",
 		"@typescript-eslint/eslint-plugin": "5.32.0",
