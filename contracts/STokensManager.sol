@@ -94,8 +94,9 @@ contract STokensManager is
 		override
 		returns (uint256)
 	{
+		// solhint-disable-next-line reason-string
 		require(
-			index < ERC721Upgradeable.balanceOf(owner),
+			index < tokenIdsMapOfOwner[owner].length(),
 			"ERC721Enumerable: owner index out of bounds"
 		);
 		return tokenIdsMapOfOwner[owner].at(index);
@@ -111,6 +112,7 @@ contract STokensManager is
 		override
 		returns (uint256)
 	{
+		// solhint-disable-next-line reason-string
 		require(
 			index < tokenIdCounter.current(),
 			"ERC721Enumerable: global index out of bounds"
