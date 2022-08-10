@@ -112,7 +112,7 @@ contract STokensManager is
 		returns (uint256)
 	{
 		require(
-			index < tokenIdCounter.current() + 1,
+			index < tokenIdCounter.current(),
 			"ERC721Enumerable: global index out of bounds"
 		);
 		return index + 1;
