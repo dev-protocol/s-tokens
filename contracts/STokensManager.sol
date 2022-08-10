@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 pragma solidity 0.8.4;
 
+import {IERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
@@ -15,6 +17,7 @@ import {IProperty} from "./interface/IProperty.sol";
 contract STokensManager is
 	ISTokenManagerStruct,
 	ISTokensManager,
+	IERC721EnumerableUpgradeable,
 	ERC721Upgradeable
 {
 	Counters.Counter private tokenIdCounter;
@@ -57,6 +60,64 @@ contract STokensManager is
 	function initialize(address _config) external initializer {
 		__ERC721_init("Dev Protocol sTokens V1", "DEV-STOKENS-V1");
 		config = _config;
+	}
+
+	/**
+	 * @dev See {IERC165-supportsInterface}.
+	 */
+	function supportsInterface(bytes4 interfaceId)
+		public
+		view
+		virtual
+		override(IERC165Upgradeable, ERC721Upgradeable)
+		returns (bool)
+	{
+		return
+			interfaceId == type(IERC721EnumerableUpgradeable).interfaceId ||
+			super.supportsInterface(interfaceId);
+	}
+
+	/**
+	 * @dev See {IERC721Enumerable-totalSupply}.
+	 */
+	function totalSupply() public view virtual override returns (uint256) {
+		return tokenIdCounter.current();
+	}
+
+	/**
+	 * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
+	 */
+	function tokenOfOwnerByIndex(address owner, uint256 index)
+		public
+		view
+		virtual
+		override
+		returns (uint256)
+	{
+		// solhint-disable-next-line reason-string
+		require(
+			index < tokenIdsMapOfOwner[owner].length(),
+			"ERC721Enumerable: owner index out of bounds"
+		);
+		return tokenIdsMapOfOwner[owner].at(index);
+	}
+
+	/**
+	 * @dev See {IERC721Enumerable-tokenByIndex}.
+	 */
+	function tokenByIndex(uint256 index)
+		public
+		view
+		virtual
+		override
+		returns (uint256)
+	{
+		// solhint-disable-next-line reason-string
+		require(
+			index < tokenIdCounter.current(),
+			"ERC721Enumerable: global index out of bounds"
+		);
+		return index + 1;
 	}
 
 	function setDescriptor(address _descriptor) external {

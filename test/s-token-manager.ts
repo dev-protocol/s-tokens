@@ -1304,4 +1304,210 @@ describe('STokensManager', () => {
 			)
 		})
 	})
+
+	describe('totalSupply', () => {
+		it('initial value is 0', async () => {
+			const [sTokensManager] = await init()
+			const totalSupply = await sTokensManager.totalSupply()
+			expect(totalSupply.toString()).to.equal('0')
+		})
+		it('increace totalSupply after minted', async () => {
+			const [sTokensManager, , lockup] = await init()
+			const mintParam = await createMintParams()
+			await lockup.executeMint(
+				mintParam.owner,
+				mintParam.property,
+				mintParam.amount,
+				mintParam.price,
+				mintParam.payload,
+				{
+					gasLimit: 1200000,
+				}
+			)
+			const totalSupply1 = await sTokensManager.totalSupply()
+			expect(totalSupply1.toString()).to.equal('1')
+
+			await lockup.executeMint(
+				mintParam.owner,
+				mintParam.property,
+				mintParam.amount,
+				mintParam.price,
+				mintParam.payload,
+				{
+					gasLimit: 1200000,
+				}
+			)
+			const totalSupply2 = await sTokensManager.totalSupply()
+			expect(totalSupply2.toString()).to.equal('2')
+		})
+	})
+	describe('tokenOfOwnerByIndex', () => {
+		describe('success', () => {
+			it('increace tokenOfOwnerByIndex after minted', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenOfOwnerByIndex1 = await sTokensManager.tokenOfOwnerByIndex(
+					mintParam.owner,
+					0
+				)
+				expect(tokenOfOwnerByIndex1.toString()).to.equal('1')
+
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenOfOwnerByIndex2 = await sTokensManager.tokenOfOwnerByIndex(
+					mintParam.owner,
+					1
+				)
+				expect(tokenOfOwnerByIndex2.toString()).to.equal('2')
+			})
+			it('[multiple persons] increace tokenOfOwnerByIndex after minted', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam1 = await createMintParams()
+				await lockup.executeMint(
+					mintParam1.owner,
+					mintParam1.property,
+					mintParam1.amount,
+					mintParam1.price,
+					mintParam1.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await lockup.executeMint(
+					mintParam1.owner,
+					mintParam1.property,
+					mintParam1.amount,
+					mintParam1.price,
+					mintParam1.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenOfOwnerByIndex1 = await sTokensManager.tokenOfOwnerByIndex(
+					mintParam1.owner,
+					1
+				)
+				expect(tokenOfOwnerByIndex1.toString()).to.equal('2')
+
+				const mintParam2 = await createMintParams()
+				await lockup.executeMint(
+					mintParam2.owner,
+					mintParam2.property,
+					mintParam2.amount,
+					mintParam2.price,
+					mintParam2.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenOfOwnerByIndex2 = await sTokensManager.tokenOfOwnerByIndex(
+					mintParam2.owner,
+					0
+				)
+				expect(tokenOfOwnerByIndex2.toString()).to.equal('3')
+			})
+		})
+		describe('fail', () => {
+			it('throws the error when the passed index is over than the holding index', async () => {
+				const [sTokensManager] = await init()
+				const mintParam = await createMintParams()
+				await expect(
+					sTokensManager.tokenOfOwnerByIndex(mintParam.owner, 0)
+				).to.be.revertedWith('ERC721Enumerable: owner index out of bounds')
+			})
+			it('[after minted] throws the error when the passed index is over than the holding index', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await expect(
+					sTokensManager.tokenOfOwnerByIndex(mintParam.owner, 1)
+				).to.be.revertedWith('ERC721Enumerable: owner index out of bounds')
+			})
+		})
+	})
+	describe('tokenByIndex', () => {
+		describe('success', () => {
+			it('increace tokenByIndex after minted', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenByIndex1 = await sTokensManager.tokenByIndex(0)
+				expect(tokenByIndex1.toString()).to.equal('1')
+
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const tokenByIndex2 = await sTokensManager.tokenByIndex(1)
+				expect(tokenByIndex2.toString()).to.equal('2')
+			})
+		})
+		describe('fail', () => {
+			it('throws the error when the passed index is over than the minted amount', async () => {
+				const [sTokensManager] = await init()
+				await expect(sTokensManager.tokenByIndex(0)).to.be.revertedWith(
+					'ERC721Enumerable: global index out of bounds'
+				)
+			})
+			it('[after minted] throws the error when the passed index is over than the minted amount', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await expect(sTokensManager.tokenByIndex(1)).to.be.revertedWith(
+					'ERC721Enumerable: global index out of bounds'
+				)
+			})
+		})
+	})
 })
