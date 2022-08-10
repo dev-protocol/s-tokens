@@ -2,8 +2,9 @@ import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 
 const alchemyApiKey = 'og4nnWIt39kz8KxzEN46npdmvtFiWkdr'
-const mnemonic = ''
-const etherscanApiKey = '8VQZGVMNHTAJEM531Z7SUYZK13MCZIIEY7'
+const mnemonic =
+	'oblige unknown coil option innocent harsh basket cherry scrap monitor transfer alert idea crush regret glue knife bracket walnut blush wrist disease owner coconut'
+const etherscanApiKey = 'P8FA8JIS622P87QTHRFRACZYQ378EG9IM6'
 
 module.exports = {
 	mocha: {
@@ -16,7 +17,7 @@ module.exports = {
 			accounts: { mnemonic },
 		},
 		mainnet: {
-			url: `https://eth.alchemyapi.io/v2/${alchemyApiKey}`,
+			url: `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`,
 			accounts: { mnemonic },
 		},
 	},

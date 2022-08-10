@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
-import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interface/ISTokensManager.sol";
+import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interfaces/ISTokensManager.sol";
 import {ISTokenManagerStruct} from "./interface/ISTokenManagerStruct.sol";
 import {ISTokenManagerDescriptor} from "./interface/ISTokenManagerDescriptor.sol";
 import {ITokenURIDescriptor} from "./interface/ITokenURIDescriptor.sol";
