@@ -4,6 +4,7 @@ pragma solidity 0.8.4;
 import {IERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ISTokensManager} from "@devprotocol/i-s-tokens/contracts/interfaces/ISTokensManager.sol";
@@ -30,6 +31,7 @@ contract STokensManager is
 	address public descriptor;
 	mapping(address => address) public override descriptorOf;
 	mapping(uint256 => bytes32) public override payloadOf;
+	address private proxyAdmin;
 
 	using Counters for Counters.Counter;
 	using EnumerableSet for EnumerableSet.UintSet;
@@ -87,7 +89,7 @@ contract STokensManager is
 	/**
 	 * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
 	 */
-	function tokenOfOwnerByIndex(address owner, uint256 index)
+	function tokenOfOwnerByIndex(address _owner, uint256 index)
 		public
 		view
 		virtual
@@ -96,10 +98,10 @@ contract STokensManager is
 	{
 		// solhint-disable-next-line reason-string
 		require(
-			index < tokenIdsMapOfOwner[owner].length(),
+			index < tokenIdsMapOfOwner[_owner].length(),
 			"ERC721Enumerable: owner index out of bounds"
 		);
-		return tokenIdsMapOfOwner[owner].at(index);
+		return tokenIdsMapOfOwner[_owner].at(index);
 	}
 
 	/**
@@ -120,6 +122,15 @@ contract STokensManager is
 		return index + 1;
 	}
 
+	function owner() external view returns (address) {
+		return ProxyAdmin(proxyAdmin).owner();
+	}
+
+	function setProxyAdmin(address _proxyAdmin) external {
+		require(proxyAdmin == address(0), "already set");
+		proxyAdmin = _proxyAdmin;
+	}
+
 	function setDescriptor(address _descriptor) external {
 		require(descriptor == address(0), "already set");
 		descriptor = _descriptor;
@@ -135,11 +146,11 @@ contract STokensManager is
 		require(_tokenId <= curretnTokenId, "not found");
 		StakingPositionV1 memory positons = getStoragePositionsV1(_tokenId);
 		RewardsV1 memory tokenRewards = _rewards(_tokenId);
-		address owner = ownerOf(_tokenId);
+		address _owner = ownerOf(_tokenId);
 		return
 			_tokenURI(
 				_tokenId,
-				owner,
+				_owner,
 				positons,
 				tokenRewards,
 				payloadOf[_tokenId]
