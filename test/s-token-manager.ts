@@ -1510,4 +1510,101 @@ describe('STokensManager', () => {
 			})
 		})
 	})
+	describe('setSTokenRoyaltyForProperty',() => {
+		describe('success', () => {
+			it('set sToken royalty for property', async () => {
+				const [sTokensManager, sTokensManagerUser , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const royalty = 1000
+				await sTokensManagerUser.setSTokenRoyaltyForProperty(
+					mintParam.property,
+					royalty
+				)
+				expect(await sTokensManager.royaltyOf(mintParam.property)).to.equal(royalty)
+			})
+		})
+		describe('fail', () => {
+			it('not authorized', async () => {
+				const [sTokensManager, , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const royalty = 1000
+				await expect(
+					sTokensManager.setSTokenRoyaltyForProperty(
+						mintParam.property,
+						royalty
+					)
+				).to.be.revertedWith('illegal access')
+			})
+			it('throws the error when the passed royalty is over than 100', async () => {
+				const [, sTokensManagerUser , lockup] = await init()
+				const mintParam = await createMintParams()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				await expect(
+					sTokensManagerUser.setSTokenRoyaltyForProperty(
+						mintParam.property,
+						10001
+					)
+				).to.be.revertedWith('ERC2981Royalties: Too high')
+			})
+		})
+	})
+	describe('royaltyInfo', () => {
+		describe('success', () => {
+			it('get royalty info', async () => {
+				const [sTokensManager, sTokensManagerUser , lockup] = await init()
+				const mintParam = await createMintParams()
+				const signers = await getSigners()
+				await lockup.executeMint(
+					mintParam.owner,
+					mintParam.property,
+					mintParam.amount,
+					mintParam.price,
+					mintParam.payload,
+					{
+						gasLimit: 1200000,
+					}
+				)
+				const royalty = 1000
+				await sTokensManagerUser.setSTokenRoyaltyForProperty(
+					mintParam.property,
+					royalty
+				)
+				const royaltyInfo = await sTokensManager.royaltyInfo(
+					1,
+					100
+				)
+				expect(royaltyInfo.receiver).to.equal(signers.user.address)
+				expect(royaltyInfo.royaltyAmount.toString()).to.equal('10')
+			})
+		})
+	})
 })
