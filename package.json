@@ -27,7 +27,7 @@
 		"@types/mocha": "9.1.1",
 		"@typescript-eslint/eslint-plugin": "5.45.0",
 		"@typescript-eslint/parser": "5.45.0",
-		"bignumber.js": "9.1.0",
+		"bignumber.js": "9.1.1",
 		"chai": "4.3.7",
 		"dotenv": "16.0.3",
 		"eslint": "8.29.0",
